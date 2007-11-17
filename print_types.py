@@ -583,5 +583,5 @@ while True:
         print "%#04x: %s" % (tpi_idx, types_s[tp])
     tpi_idx += 1
 
-#for k in sorted(tpi.keys()):
-#    print "%#04x: %s" % (k, " ".join(split_s(tpi[k].encode('hex'),2)))
+for k in sorted(tpi.keys()):
+    print "%#04x: %s" % (k, " ".join(split_s(tpi[k].encode('hex'),2)))
