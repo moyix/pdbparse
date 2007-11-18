@@ -23,7 +23,7 @@ vtype  = {
     "T_UINT4": "'unsigned long'",
     "T_ULONG": "'unsigned long'",
     "T_UQUAD": "'unsigned long long'",
-    "T_USHORT": "'unsigned snort'",
+    "T_USHORT": "'unsigned short'",
     "T_VOID": "'void'",
 }
 base_type_size = {
