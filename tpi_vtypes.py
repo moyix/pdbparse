@@ -80,8 +80,11 @@ def print_vtype(lf):
         print "    '%s' : [ %#x, %s]," % (s.name, s.offset, member_str(s.index))
     print "} ],"
 
-pdb = pdbparse.parse(sys.argv[1])
+if len(sys.argv) < 2:
+    sys.stderr.write("usage: %s <PDB> [structures ...]\n" % sys.argv[0]) 
+    sys.exit(1)
 
+pdb = pdbparse.parse(sys.argv[1])
 types = sys.argv[2:]
 
 if not types:
