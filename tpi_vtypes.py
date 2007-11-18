@@ -82,12 +82,20 @@ def print_vtype(lf):
         print "    '%s' : [ %#x, %s]," % (s.name, s.offset, member_str(s.index))
     print "} ],"
 
-if len(sys.argv) < 2:
-    sys.stderr.write("usage: %s <PDB> [structures ...]\n" % sys.argv[0]) 
-    sys.exit(1)
 
-pdb = pdbparse.parse(sys.argv[1])
-types = sys.argv[2:]
+from optparse import OptionParser
+op = OptionParser()
+op.add_option("-i", "--include", dest="include",
+                  help="include extra types in FILE", metavar="FILE")
+op.add_option("-n", "--name", dest="name",
+                  help="place types in a dict named NAME", metavar="NAME")
+(opts, args) = op.parse_args()
+
+if len(args) < 1:
+    op.error("a PDB file is required")
+
+pdb = pdbparse.parse(args[0])
+types = args[1:]
 
 if not types:
     structs = [ t for t in pdb.streams[2].types.values()
@@ -97,8 +105,13 @@ else:
     structs = [ pdb.streams[2].structures[t] for t in types
                 if not pdb.streams[2].structures[t].prop.fwdref ]
 
-print "%s_types = {" % basename(sys.argv[1]).split(".")[0]
+if opts.name:
+    print "%s = {" % opts.name
+else:
+    print "%s_types = {" % basename(args[0]).split(".")[0]
 for s in structs:
     print_vtype(s)
+if opts.include:
+    sys.stdout.write(open(opts.include).read())
 print "}"
 
