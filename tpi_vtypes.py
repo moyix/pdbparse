@@ -7,6 +7,7 @@ from os.path import basename
 ARCH_PTR_SIZE = 4
 
 vtype  = {
+    "T_32PINT4": "'pointer', ['long']",
     "T_32PRCHAR": "'pointer', ['unsigned char']",
     "T_32PUCHAR": "'pointer', ['unsigned char']",
     "T_32PULONG": "'pointer', ['unsigned long']",
@@ -70,11 +71,12 @@ def member_str(m):
         return "['array', %d, %s]" % (count, member_str(m.element_type))
     elif m.leaf_type == "LF_STRUCTURE":
         return "['%s']" % m.name
+    elif m.leaf_type == "LF_UNION":
+        return "['%s']" % m.name
     else:
         return "[UNIMPLEMENTED %s]" % m.leaf_type
 
 def print_vtype(lf):
-    assert lf.leaf_type == "LF_STRUCTURE"
     print "  '%s' : [ %#x, {" % (lf.name, lf.size)
     for s in lf.fieldlist.substructs:
         print "    '%s' : [ %#x, %s]," % (s.name, s.offset, member_str(s.index))
@@ -89,7 +91,8 @@ types = sys.argv[2:]
 
 if not types:
     structs = [ t for t in pdb.streams[2].types.values()
-                if t.leaf_type == 'LF_STRUCTURE' and not t.prop.fwdref ]
+                if (t.leaf_type == 'LF_STRUCTURE' or t.leaf_type == "LF_UNION")
+                and not t.prop.fwdref ]
 else:
     structs = [ pdb.streams[2].structures[t] for t in types
                 if not pdb.streams[2].structures[t].prop.fwdref ]
