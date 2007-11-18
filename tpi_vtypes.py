@@ -94,7 +94,7 @@ else:
     structs = [ pdb.streams[2].structures[t] for t in types
                 if not pdb.streams[2].structures[t].prop.fwdref ]
 
-print "%s_types {" % basename(sys.argv[1]).split(".")[0]
+print "%s_types = {" % basename(sys.argv[1]).split(".")[0]
 for s in structs:
     print_vtype(s)
 print "}"
