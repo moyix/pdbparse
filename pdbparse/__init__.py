@@ -25,7 +25,7 @@ def _pages(length, pagesize):
     if (length % pagesize): num_pages += 1
     return num_pages
 
-class StreamFile():
+class StreamFile:
     def __init__(self, fp, pages, size=-1, page_size=0x1000):
         self.fp = fp
         self.pages = pages
