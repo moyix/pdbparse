@@ -11,6 +11,7 @@ vtype  = {
     "T_32PRCHAR": "'pointer', ['unsigned char']",
     "T_32PUCHAR": "'pointer', ['unsigned char']",
     "T_32PULONG": "'pointer', ['unsigned long']",
+    "T_32PLONG": "'pointer', ['long']",
     "T_32PUQUAD": "'pointer', ['unsigned long long']",
     "T_32PUSHORT": "'pointer', ['unsigned short']",
     "T_32PVOID": "'pointer', ['void']",
@@ -25,6 +26,7 @@ vtype  = {
     "T_ULONG": "'unsigned long'",
     "T_UQUAD": "'unsigned long long'",
     "T_USHORT": "'unsigned short'",
+    "T_WCHAR": "'wchar'",
     "T_VOID": "'void'",
 }
 base_type_size = {
@@ -45,6 +47,8 @@ base_type_size = {
     "T_ULONG": 4,
     "T_UQUAD": 8,
     "T_USHORT": 2,
+    "T_WCHAR": 2,
+    "T_32PLONG": 4,
 }
 def get_size(lf):
     if isinstance(lf,str):
