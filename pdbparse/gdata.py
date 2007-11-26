@@ -16,7 +16,6 @@ _gsym = Struct("global",
     ),
 )
 
-
 class GDataAdapter(Adapter):
     def _encode(self,obj,context):
         return _gsym._build(StringIO(obj),context)
@@ -26,3 +25,9 @@ class GDataAdapter(Adapter):
         return con
 
 GlobalsData = GreedyRange(GDataAdapter(PascalString("globals", length_field=ULInt16("len"))))
+
+def parse(data):
+    return GlobalsData.parse(data)
+
+def parse_stream(stream):
+    return GlobalsData.parse_stream(stream)

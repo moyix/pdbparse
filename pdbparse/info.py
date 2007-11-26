@@ -17,11 +17,18 @@ def GUID(name):
         String("Data4", 8),
     )
 
-InfoHeader = Struct("InfoHeader",
+Info = Struct("Info",
     ULInt32("Version"),
     ULInt32("TimeDateStamp"),
     ULInt32("Age"),
-    GUID("guid"),
+    GUID("GUID"),
     ULInt32("cbNames"),
     StringArrayAdapter(MetaField("names", lambda ctx: ctx.cbNames)),
 )
+
+def parse_stream(stream):
+    return Info.parse_stream(stream)
+
+def parse(data):
+    return Info.parse(data)
+

@@ -175,21 +175,22 @@ class PDB2RootStream(PDBStream):
         self.streams = zip(sizes, page_lists)
 
 class PDBInfoStream(PDBStream):
-    def __init__(self, fp, pages, index=PDB_STREAM_DBI, size=-1,
+    def __init__(self, fp, pages, index=PDB_STREAM_PDB, size=-1,
             page_size=0x1000, fast_load=False):
         PDBStream.__init__(self, fp, pages, index, size=size, page_size=page_size)
         if fast_load: return
         else: self.load()
     def load(self):
         import info
-        tpis = tpi.parse_stream(self.stream_file)
-        self.header = tpis.TPIHeader
-        self.num_types = self.header.ti_max - self.header.ti_min
-        self.types = tpis.types
-        self.structures = dict((s.name, s) for s in tpis.types.values()
-            if s.leaf_type == "LF_STRUCTURE" or s.leaf_type == "LF_STRUCTURE_ST")
-        del tpis
-   pass
+        from datetime import datetime
+
+        inf = info.parse_stream(self.stream_file)
+        self.Version = inf.Version
+        self.TimeDateStamp = datetime.fromtimestamp(inf.TimeDateStamp)
+        self.Age = inf.Age
+        self.GUID = inf.GUID
+        self.names = inf.names
+        del inf
 
 class PDBTypeStream(PDBStream):
     def __init__(self, fp, pages, index=PDB_STREAM_TPI, size=-1,
@@ -208,19 +209,51 @@ class PDBTypeStream(PDBStream):
         del tpis
 
 class PDBDebugStream(PDBStream):
-    pass
+    def __init__(self, fp, pages, index=PDB_STREAM_PDB, size=-1,
+            page_size=0x1000, fast_load=False):
+        PDBStream.__init__(self, fp, pages, index, size=size, page_size=page_size)
+        if fast_load: return
+        else: self.load()
+    def load(self):
+        import dbi 
+        debug = dbi.parse_stream(self.stream_file)
+
+        self.version = debug.DBIHeader.version
+        #self.unknown = debug.DBIHeader.unknown
+        self.hash1_file  = debug.DBIHeader.hash1_file
+        self.hash2_file = debug.DBIHeader.hash2_file
+        self.gsym_file = debug.DBIHeader.gsym_file
+        self.module_size = debug.DBIHeader.module_size
+        self.offset_size = debug.DBIHeader.offset_size
+        self.hash_size = debug.DBIHeader.hash_size
+        self.srcmodule_size = debug.DBIHeader.srcmodule_size
+        self.pdbimport_size = debug.DBIHeader.pdbimport_size
+        del debug
+
+class PDBGlobalSymbolStream(PDBStream):
+    def __init__(self, fp, pages, index=PDB_STREAM_PDB, size=-1,
+            page_size=0x1000, fast_load=False):
+        PDBStream.__init__(self, fp, pages, index, size=size, page_size=page_size)
+        if fast_load: return
+        else: self.load()
+    def load(self):
+        import gdata
+        self.globals = gdata.GlobalsData.parse_stream(self.stream_file)
+
 
 # Class mappings for the stream types
 _stream_types7 = {
     PDB_STREAM_ROOT: PDB7RootStream,
     PDB_STREAM_TPI: PDBTypeStream,
-    #PDB_STREAM_PDB: PDBInfoStream,
-    #PDB_STREAM_DBI: PDBDebugStream
+    PDB_STREAM_PDB: PDBInfoStream,
+    PDB_STREAM_DBI: PDBDebugStream,
 }
 
 _stream_types2 = {
     PDB_STREAM_ROOT: PDB2RootStream,
     PDB_STREAM_TPI: PDBTypeStream,
+    PDB_STREAM_PDB: PDBInfoStream,
+    PDB_STREAM_DBI: PDBDebugStream,
 }
 
 class PDB:
@@ -294,6 +327,12 @@ class PDB7(PDB):
 
         self.read_root(self.root_stream)
 
+        # Load global symbols, if present
+        if not fast_load and self.streams[PDB_STREAM_DBI].gsym_file:
+            gsf = self.streams[PDB_STREAM_DBI].gsym_file
+            self.streams[gsf] = PDBGlobalSymbolStream(self.fp, self.streams[gsf].pages,
+                gsf, size=self.streams[gsf].size, page_size=self.page_size,
+                fast_load=self.fast_load)
 
 class PDB2(PDB):
     def __init__(self, fp, fast_load=False):
@@ -318,6 +357,13 @@ class PDB2(PDB):
             index=PDB_STREAM_ROOT, page_size=self.page_size)
 
         self.read_root(self.root_stream)
+
+        # Load global symbols, if present
+        if not fast_load and self.streams[PDB_STREAM_DBI].gsym_file:
+            gsf = self.streams[PDB_STREAM_DBI].gsym_file
+            self.streams[gsf] = PDBGlobalSymbolStream(self.fp, self.streams[gsf].pages,
+                gsf, size=self.streams[gsf].size, page_size=self.page_size,
+                fast_load=self.fast_load)
 
 def parse(filename, fast_load=False):
     "Open a PDB file and autodetect its version"

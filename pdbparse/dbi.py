@@ -16,7 +16,7 @@ def SymbolRange(name):
     )
 
 DBIHeader = Struct("DBIHeader",
-    ULInt32("signature"),
+    Const(Bytes("magic", 4), "\xFF\xFF\xFF\xFF"),
     ULInt32("version"),
     ULInt32("unknown"),
     ULInt32("hash1_file"),
@@ -50,10 +50,8 @@ DBI = Debugger(Struct("DBI",
     #GreedyRange(DBIExHeader),
 ))
 
-data_v3 = Struct("data_v3",
-    ULInt32("symtype"),
-    ULInt32("offset"),
-    ULInt16("segment"),
-    CString("name"),
-)
+def parse_stream(stream):
+    return DBI.parse_stream(stream)
 
+def parse(data):
+    return DBI.parse(data)
