@@ -175,10 +175,24 @@ class PDB2RootStream(PDBStream):
         self.streams = zip(sizes, page_lists)
 
 class PDBInfoStream(PDBStream):
-    pass
+    def __init__(self, fp, pages, index=PDB_STREAM_DBI, size=-1,
+            page_size=0x1000, fast_load=False):
+        PDBStream.__init__(self, fp, pages, index, size=size, page_size=page_size)
+        if fast_load: return
+        else: self.load()
+    def load(self):
+        import info
+        tpis = tpi.parse_stream(self.stream_file)
+        self.header = tpis.TPIHeader
+        self.num_types = self.header.ti_max - self.header.ti_min
+        self.types = tpis.types
+        self.structures = dict((s.name, s) for s in tpis.types.values()
+            if s.leaf_type == "LF_STRUCTURE" or s.leaf_type == "LF_STRUCTURE_ST")
+        del tpis
+   pass
 
 class PDBTypeStream(PDBStream):
-    def __init__(self, fp, pages, index=PDB_STREAM_ROOT, size=-1,
+    def __init__(self, fp, pages, index=PDB_STREAM_TPI, size=-1,
             page_size=0x1000, fast_load=False):
         PDBStream.__init__(self, fp, pages, index, size=size, page_size=page_size)
         if fast_load: return
