@@ -239,6 +239,13 @@ class PDBGlobalSymbolStream(PDBStream):
     def load(self):
         import gdata
         self.globals = gdata.GlobalsData.parse_stream(self.stream_file)
+        self.vars = {}
+        for g in self.globals:
+            if g.symtype == 0:
+                if g.name.startswith("_"):
+                    self.vars[g.name[1:]] = g
+                else:
+                    self.vars[g.name] = g
 
 
 # Class mappings for the stream types
