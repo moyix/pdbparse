@@ -1034,7 +1034,7 @@ def rename_2_7(lf):
     if lf.leaf_type.endswith("_ST"):
         lf.leaf_type = lf.leaf_type[:-3]
 
-def parse_stream(fp):
+def parse_stream(fp, unnamed_hack=True):
     """Parse a TPI stream.
 
     fp: a file-like object that holds the type data to be parsed. Must
@@ -1111,14 +1111,17 @@ def parse_stream(fp):
             types[i] = merge_fwdrefs(types[i], types, fwdref_map)
     # Get rid of the resolved fwdrefs
     for i in fwdref_map: del types[i]
-    #print "%d types unresolved:" %  (len(fwdrefs) - len(fwdref_map))
-    #for i in (set(fwdrefs.values()) - set(fwdref_map.keys())):
-    #    print types[i].name
+
+    if unnamed_hack:
+        for i in types:
+            if (hasattr(types[i], 'name') and
+                    types[i].name == "__unnamed"):
+                types[i].name = types[i].name + ("_%x" % types[i].tpi_idx)
 
     return tpi_stream
 
-def parse(data):
-    return parse_stream(StringIO(data))
+def parse(data, unnamed_hack=True):
+    return parse_stream(StringIO(data), unnamed_hack)
     
 if __name__ == "__main__":
     import sys
