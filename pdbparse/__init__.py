@@ -238,7 +238,7 @@ class PDBGlobalSymbolStream(PDBStream):
         else: self.load()
     def load(self):
         import gdata
-        self.globals = gdata.GlobalsData.parse_stream(self.stream_file)
+        self.globals = gdata.parse_stream(self.stream_file)
         self.vars = {}
         for g in self.globals:
             if g.symtype == 0:
