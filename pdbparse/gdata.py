@@ -2,7 +2,7 @@ from construct import *
 from cStringIO import StringIO
 from pdbparse.tpi import merge_subcon
 
-_gsym = Struct("global",
+gsym = Struct("global",
     ULInt16("leaf_type"),
     Switch("data", lambda ctx: ctx.leaf_type,
         {
@@ -16,18 +16,21 @@ _gsym = Struct("global",
     ),
 )
 
-class GDataAdapter(Adapter):
-    def _encode(self,obj,context):
-        return _gsym._build(StringIO(obj),context)
-    def _decode(self,obj,context):
-        con = _gsym._parse(StringIO(obj),context)
-        merge_subcon(con, "data")
-        return con
-
-GlobalsData = GreedyRange(GDataAdapter(PascalString("globals", length_field=ULInt16("len"))))
+GlobalsData = GreedyRange(
+    Tunnel(
+        PascalString("globals", length_field=ULInt16("len")),
+        gsym,
+    )
+)
 
 def parse(data):
-    return GlobalsData.parse(data)
+    con = GlobalsData.parse(data)
+    for sc in con:
+        merge_subcon(sc, "data")
+    return con
 
 def parse_stream(stream):
-    return GlobalsData.parse_stream(stream)
+    con = GlobalsData.parse_stream(stream)
+    for sc in con:
+        merge_subcon(sc, "data")
+    return con
