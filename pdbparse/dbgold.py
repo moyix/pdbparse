@@ -3,6 +3,22 @@
 from construct import *
 from pdbparse.pe import IMAGE_SECTION_HEADER
 from pdbparse.fpo import FPO_DATA
+from pdbparse.info import GUID
+
+CV_RSDS_HEADER = Struct("CV_RSDS",
+    Const(Bytes("Signature", 4), "RSDS"),
+    GUID("GUID"),
+    ULInt32("Age"),
+    CString("Filename"),
+)
+
+CV_NB10_HEADER = Struct("CV_NB10",
+    Const(Bytes("Signature", 4), "NB10"),
+    ULInt32("Offset"),
+    ULInt32("Timestamp"),
+    ULInt32("Age"),
+    CString("Filename"),
+)
 
 DebugDirectoryType = Enum(ULInt32("Type"),
     IMAGE_DEBUG_TYPE_UNKNOWN        = 0,
@@ -52,10 +68,12 @@ IMAGE_DEBUG_DIRECTORY = Struct("IMAGE_DEBUG_DIRECTORY",
 IMAGE_DEBUG_MISC = Struct("IMAGE_DEBUG_MISC",
     ULInt32("DataType"),
     ULInt32("Length"),
-    ULInt32("Unicode"),
     Byte("Unicode"),
     Array(3, Byte("Reserved")),
-    String("Data", lambda ctx: ctx.Length - 12),
+    Tunnel(
+        String("Strings", lambda ctx: ctx.Length - 12),
+        GreedyRange(CString("Strings")),
+    ),
 )
 
 IMAGE_FUNCTION_ENTRY = Struct("IMAGE_FUNCTION_ENTRY",
