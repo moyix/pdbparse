@@ -24,7 +24,6 @@ def download_file(guid,fname):
     tries = [ fname, fname[:-1] + '_', 'file.ptr' ]
 
     for t in tries:
-        print url+t
         request = urllib2.Request(url+t)
         request.add_header('User-agent', UA)
         try:
@@ -63,31 +62,66 @@ def get_pe_guid(filename):
                         pe.OPTIONAL_HEADER.SizeOfImage)
     return guidstr
 
+def handle_pe(pe_file):
+    dbgdata, tp = get_pe_debug_data(pe_file)
+    if tp == "IMAGE_DEBUG_TYPE_CODEVIEW":
+        # XP+
+        (guid,filename) = get_rsds(dbgdata)
+        guid = guid.upper()
+        saved_file = download_file(guid,filename)
+    elif tp == "IMAGE_DEBUG_TYPE_MISC":
+        # Win2k
+        # Get the .dbg file
+        guid = get_pe_guid(sys.argv[1])
+        guid = guid.upper()
+        filename = get_dbg_fname(dbgdata)
+        saved_file = download_file(guid,filename)
 
-dbgdata, tp = get_pe_debug_data(sys.argv[1])
-if tp == "IMAGE_DEBUG_TYPE_CODEVIEW":
-    # XP+
-    (guid,filename) = get_rsds(dbgdata)
-    guid = guid.upper()
-    saved_file = download_file(guid,filename)
-elif tp == "IMAGE_DEBUG_TYPE_MISC":
-    # Win2k
-    # Get the .dbg file
-    guid = get_pe_guid(sys.argv[1])
-    filename = get_dbg_fname(dbgdata)
-    saved_file = download_file(guid,filename)
+        # Extract it if it's compressed
+        # Note: requires cabextract!
+        if saved_file.endswith("_"):
+            os.system("cabextract %s" % saved_file)
+            saved_file = saved_file.replace('.db_','.dbg')
 
-    # Extract it if it's compressed
+        from pdbparse.dbgold import DbgFile
+        dbgfile = DbgFile.parse_stream(open(saved_file))
+        cv_entry = [ d for d in dbgfile.IMAGE_DEBUG_DIRECTORY
+                       if d.Type == "IMAGE_DEBUG_TYPE_CODEVIEW"][0]
+        if cv_entry.Data[:4] == "NB09":
+            return
+        elif cv_entry.Data[:4] == "NB10":
+            (guid,filename) = get_nb10(cv_entry.Data)
+            
+            guid = guid.upper()
+            saved_file = download_file(guid,filename)
+        else:
+            print "WARN: DBG file received from symbol server has unknown CodeView section"
+            return
+
     if saved_file.endswith("_"):
         os.system("cabextract %s" % saved_file)
-        saved_file = saved_file.replace('.db_','.dbg')
 
-    from pdbparse.dbgold import DbgFile
-    dbgfile = DbgFile.parse_stream(open(saved_file))
-    cv_entry = [ d for d in dbgfile.IMAGE_DEBUG_DIRECTORY
-                   if d.Type == "IMAGE_DEBUG_TYPE_CODEVIEW"][0]
-    (guid,filename) = get_nb10(cv_entry.Data)
-    saved_file = download_file(guid,filename)
+if __name__ == "__main__":
+    from optparse import OptionParser
 
-if saved_file.endswith("_"):
-    os.system("cabextract %s" % saved_file)
+    parser = OptionParser()
+    parser.add_option('-e', '--executable', dest='exe',
+            help='download symbols for an executable')
+    parser.add_option('-g', '--guid', dest='guid',
+            help='use GUID to download symbols [Note: requires -s]')
+    parser.add_option('-s', '--symbols', dest='symfile', metavar='FILENAME',
+            help='use FILENAME to download symbols [Note: requires -g]')
+
+    opts,args = parser.parse_args()
+
+    if opts.exe:
+        handle_pe(opts.exe)
+    if opts.guid and opts.symfile:
+        saved_file = download_file(opts.guid, opts.symfile)
+        if saved_file.endswith("_"):
+            os.system("cabextract %s" % saved_file)
+    
+    if not (opts.exe or opts.guid or opts.symfile) and args:
+        for a in args: handle_pe(a)
+    else:
+        parser.error("Must supply a PE file or specify by GUID")
