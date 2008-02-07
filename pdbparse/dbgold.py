@@ -35,6 +35,11 @@ DebugDirectoryType = Enum(ULInt32("Type"),
     _default_ = "IMAGE_DEBUG_TYPE_UNKNOWN",
 )
 
+DebugMiscType = Enum(ULInt32("Type"),
+    IMAGE_DEBUG_MISC_EXENAME        = 1,
+    _default_ = Pass,
+)
+
 IMAGE_SEPARATE_DEBUG_HEADER = Struct("IMAGE_SEPARATE_DEBUG_HEADER",
     Const(Bytes("Signature", 2), "DI"),
     ULInt16("Flags"),
@@ -66,7 +71,7 @@ IMAGE_DEBUG_DIRECTORY = Struct("IMAGE_DEBUG_DIRECTORY",
 )
 
 IMAGE_DEBUG_MISC = Struct("IMAGE_DEBUG_MISC",
-    ULInt32("DataType"),
+    DebugMiscType,
     ULInt32("Length"),
     Byte("Unicode"),
     Array(3, Byte("Reserved")),
