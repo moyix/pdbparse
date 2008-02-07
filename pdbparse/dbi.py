@@ -56,6 +56,35 @@ DBI = Debugger(Struct("DBI",
     DBIHeader,
 ))
 
+def SrcModuleData(sz):
+    return HexDumpAdapter(String("SrcModuleData", sz))
+
+def HashData(sz):
+    return HexDumpAdapter(String("HashData", sz))   
+
+def OffsetData(sz):
+    return Tunnel(
+        String("OffsetData", sz),
+        Struct("OffsetData",
+            ULInt32("unknown"),
+            GreedyRange(
+                Struct("OffsetRecord",
+                    ULInt32("unk1"),
+                    ULInt16("unk2"),
+                    ULInt16("unk3"),
+                    ULInt32("unk4"),
+                    ULInt32("unk5"),
+                    ULInt32("unk6"),
+                    ULInt32("unk7"),
+                    ULInt32("unk8"),
+                ),
+            ),
+        ),
+    )
+
+def PdbImportData(sz):
+    return HexDumpAdapter(String("PdbImportData", sz))
+
 def parse_stream(stream):
     pos = 0
     dbihdr = DBIHeader.parse_stream(stream)
@@ -69,8 +98,19 @@ def parse_stream(stream):
         sz = get_parsed_size(DBIExHeader,dbiexhdrs[-1])
         if sz % _ALIGN != 0: sz = sz + (_ALIGN - (sz % _ALIGN))
         dbiexhdr_data = dbiexhdr_data[sz:]
+    
+    offdata = OffsetData(dbihdr.offset_size).parse_stream(stream)
     print stream.tell()
-    return Container(DBIHeader = dbihdr, DBIExHeaders = ListContainer(dbiexhdrs))
+    hashdata = HashData(dbihdr.hash_size).parse_stream(stream)
+    print stream.tell()
+    srcmoduledata = SrcModuleData(dbihdr.srcmodule_size).parse_stream(stream)
+    print stream.tell()
+    pdbimportdata = PdbImportData(dbihdr.pdbimport_size).parse_stream(stream)
+    print stream.tell()
+
+    return Container(DBIHeader=dbihdr, DBIExHeaders=ListContainer(dbiexhdrs),
+                     OffsetData=offdata, HashData=hashdata,
+                     SrcModuleData=srcmoduledata, PdbImportData=pdbimportdata)
 
 def parse(data):
     return parse_stream(StringIO(data))
