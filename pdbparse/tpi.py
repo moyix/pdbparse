@@ -613,7 +613,7 @@ def val(name):
     )
 
 PadAlign = If(lambda ctx: ctx._pad > 0xF0,
-    Padding(lambda ctx: ctx._pad & 0x0F)
+    Optional(Padding(lambda ctx: ctx._pad & 0x0F))
 )
 
 ### Leaf types
@@ -863,7 +863,7 @@ lfVTShape = Struct("lfVTShape",
     )
 )
 
-Type = Struct("type",
+Type = Debugger(Struct("type",
     leaf_type,
     Switch("type_info", lambda ctx: ctx.leaf_type,
         {
@@ -886,7 +886,7 @@ Type = Struct("type",
         },
         default = Pass,
     ),
-)
+))
 
 Type = Struct("types",
     ULInt16("length"),
@@ -1122,5 +1122,5 @@ if __name__ == "__main__":
     ed = time.time()
     print "Parsed %d types in %f seconds" % (len(tpi_stream.types), ed - st)
 
-    for k,v in tpi_stream.types.items():
-        print k,v
+    #for k,v in tpi_stream.types.items():
+    #    print k,v
