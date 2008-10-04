@@ -562,6 +562,7 @@ CV_call = Enum(ULInt8("call_conv"),
     SH5CALL         = 0x00000014,
     M32RCALL        = 0x00000015,
     RESERVED        = 0x00000016,
+    _default_       = Pass,
 )
 
 CV_property = BitStruct("prop",
@@ -862,20 +863,7 @@ lfVTShape = Struct("lfVTShape",
     )
 )
 
-### Main type structures
-class TypeAdapter(Adapter):
-    """Adapter for string->parsed construct.
-    
-    This class implements an adapter that simply passes the data along to
-    the type construct. This is useful mainly with a MetaField that gets
-    a predefined amount of data.
-    """
-    def _encode(self,obj,context):
-        return _type._build(StringIO(obj),context)
-    def _decode(self,obj,context):
-        return _type._parse(StringIO(obj),context)
-
-_type = Struct("type",
+Type = Struct("type",
     leaf_type,
     Switch("type_info", lambda ctx: ctx.leaf_type,
         {
@@ -902,7 +890,10 @@ _type = Struct("type",
 
 Type = Struct("types",
     ULInt16("length"),
-    TypeAdapter(MetaField("type_data", lambda ctx: ctx.length)),
+    Tunnel(
+        String("type_data", lambda ctx: ctx.length),
+        Type,
+    ),
 )
 
 ### Header structures
