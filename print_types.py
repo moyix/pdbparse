@@ -498,8 +498,13 @@ def print_procedure(data, idx):
     (lf,rvtype,calltype,reserved,
         parmct,arglist) = unpack(fmt, data[:fmtl])
     calltype = ord(calltype)
+    try:
+        call_conv = cv_call_s[calltype]
+    except KeyError:
+        call_conv = "CV_CALL_UNKNOWN_%x" % calltype
+        
     print ("%#04x: Procedure with return type %#04x, calling convention %s, "
-           "%d parameters at type index %#04x" % (idx,rvtype,cv_call_s[calltype],
+           "%d parameters at type index %#04x" % (idx,rvtype,call_conv,
                parmct, arglist))
 
 def print_arglist(data, idx):
