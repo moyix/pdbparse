@@ -15,11 +15,15 @@ vtype  = {
     "T_32PUQUAD": "'pointer', ['unsigned long long']",
     "T_32PUSHORT": "'pointer', ['unsigned short']",
     "T_32PVOID": "'pointer', ['void']",
+    "T_64PVOID": "'pointer64', ['void']",
     "T_INT4": "'long'",
+    "T_INT8": "'long long'",
     "T_LONG": "'long'",
     "T_QUAD": "'long long'",
     "T_RCHAR": "'unsigned char'",
-    "T_REAL64": "'long long'",
+    "T_REAL32": "'float'",
+    "T_REAL64": "'double'",
+    "T_REAL80": "'long double'",
     "T_SHORT": "'short'",
     "T_UCHAR": "'unsigned char'",
     "T_UINT4": "'unsigned long'",
@@ -36,11 +40,15 @@ base_type_size = {
     "T_32PUQUAD": 4,
     "T_32PUSHORT": 4,
     "T_32PVOID": 4,
+    "T_64PVOID": 8,
     "T_INT4": 4,
+    "T_INT8": 8,
     "T_LONG": 4,
     "T_QUAD": 8,
     "T_RCHAR": 1,
+    "T_REAL32": 4,
     "T_REAL64": 8,
+    "T_REAL80": 10,
     "T_SHORT": 2,
     "T_UCHAR": 1,
     "T_UINT4": 4,
@@ -77,6 +85,8 @@ def member_str(m):
         return "['%s']" % m.name
     elif m.leaf_type == "LF_UNION":
         return "['%s']" % m.name
+    elif m.leaf_type == "LF_PROCEDURE":
+        return "['void']"
     else:
         return "[UNIMPLEMENTED %s]" % m.leaf_type
 
