@@ -2,7 +2,9 @@
 
 import urllib2
 import sys,os
+import os.path
 from pefile import PE
+from shutil import copyfileobj
 from pdbparse.dbgold import CV_RSDS_HEADER, CV_NB10_HEADER, DebugDirectoryType
 
 UA = "Microsoft-Symbol-Server/6.6.0007.5"
@@ -12,28 +14,30 @@ def get_pe_debug_data(filename):
     dbgstruct = pe.DIRECTORY_ENTRY_DEBUG[0].struct
     addr = dbgstruct.PointerToRawData
     sz = dbgstruct.SizeOfData
-    f = open(sys.argv[1])
+    f = open(filename)
     f.seek(addr)
     dbgdata = f.read(sz)
     f.close()
     return dbgdata, DebugDirectoryType._decode(dbgstruct.Type,{})
 
-def download_file(guid,fname):
+def download_file(guid,fname,path=""):
     url = "http://msdl.microsoft.com/download/symbols/%s/%s/" % (fname,guid)
     opener = urllib2.build_opener()
     tries = [ fname, fname[:-1] + '_', 'file.ptr' ]
 
     for t in tries:
         request = urllib2.Request(url+t)
+        print "Trying %s" % (url+t)
         request.add_header('User-agent', UA)
         try:
             op = opener.open(request)
-            f = open(t, 'w')
-            f.write(op.read())
+            f = open(path+t, 'w')
+            copyfileobj(op,f)
+            #f.write(op.read())
             f.close()
             op.close()
-            print "Saved symbols to %s" % t
-            return t
+            print "Saved symbols to %s" % (path+t)
+            return path+t
         except urllib2.HTTPError:
             pass
     return False
@@ -49,7 +53,8 @@ def get_rsds(dbgdata):
     guidstr = "%x%x%x%s%x" % (dbg.GUID.Data1, dbg.GUID.Data2, 
                               dbg.GUID.Data3, dbg.GUID.Data4.encode('hex'),
                               dbg.Age)
-    return guidstr,dbg.Filename
+    filename = dbg.Filename.split('\\')[-1]
+    return guidstr,filename
 
 def get_nb10(dbgdata):
     dbg = CV_NB10_HEADER.parse(dbgdata)
@@ -72,7 +77,7 @@ def handle_pe(pe_file):
     elif tp == "IMAGE_DEBUG_TYPE_MISC":
         # Win2k
         # Get the .dbg file
-        guid = get_pe_guid(sys.argv[1])
+        guid = get_pe_guid(pe_file)
         guid = guid.upper()
         filename = get_dbg_fname(dbgdata)
         saved_file = download_file(guid,filename)
@@ -101,12 +106,21 @@ def handle_pe(pe_file):
     if saved_file.endswith("_"):
         os.system("cabextract %s" % saved_file)
 
+def get_pe_from_pe(filename):
+    guid = get_pe_guid(filename)
+    symname = os.path.basename(filename)
+    saved_file = download_file(guid, symname)
+    if saved_file.endswith("_"):
+        os.system("cabextract %s" % saved_file)
+
 if __name__ == "__main__":
     from optparse import OptionParser
 
     parser = OptionParser()
     parser.add_option('-e', '--executable', dest='exe',
             help='download symbols for an executable')
+    parser.add_option('-p', '--pefile', dest='pe',
+            help='download clean copy of an executable')
     parser.add_option('-g', '--guid', dest='guid',
             help='use GUID to download symbols [Note: requires -s]')
     parser.add_option('-s', '--symbols', dest='symfile', metavar='FILENAME',
@@ -116,12 +130,14 @@ if __name__ == "__main__":
 
     if opts.exe:
         handle_pe(opts.exe)
+    if opts.pe:
+        get_pe_from_pe(opts.pe)
     if opts.guid and opts.symfile:
         saved_file = download_file(opts.guid, opts.symfile)
         if saved_file.endswith("_"):
             os.system("cabextract %s" % saved_file)
     
-    if not (opts.exe or opts.guid or opts.symfile) and args:
+    if not (opts.exe or opts.guid or opts.symfile or opts.pe) and args:
         for a in args: handle_pe(a)
-    else:
+    elif not (opts.exe or opts.guid or opts.symfile or opts.pe) and not args:
         parser.error("Must supply a PE file or specify by GUID")
