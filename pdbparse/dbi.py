@@ -100,13 +100,13 @@ def parse_stream(stream):
         dbiexhdr_data = dbiexhdr_data[sz:]
     
     offdata = OffsetData(dbihdr.offset_size).parse_stream(stream)
-    print stream.tell()
+    #print stream.tell()
     hashdata = HashData(dbihdr.hash_size).parse_stream(stream)
-    print stream.tell()
+    #print stream.tell()
     srcmoduledata = SrcModuleData(dbihdr.srcmodule_size).parse_stream(stream)
-    print stream.tell()
+    #print stream.tell()
     pdbimportdata = PdbImportData(dbihdr.pdbimport_size).parse_stream(stream)
-    print stream.tell()
+    #print stream.tell()
 
     return Container(DBIHeader=dbihdr, DBIExHeaders=ListContainer(dbiexhdrs),
                      OffsetData=offdata, HashData=hashdata,
