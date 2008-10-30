@@ -259,7 +259,7 @@ _stream_types7 = {
 _stream_types2 = {
     PDB_STREAM_ROOT: PDB2RootStream,
     PDB_STREAM_TPI: PDBTypeStream,
-    PDB_STREAM_PDB: PDBInfoStream,
+    #PDB_STREAM_PDB: PDBInfoStream,
     PDB_STREAM_DBI: PDBDebugStream,
 }
 
@@ -366,11 +366,11 @@ class PDB2(PDB):
         self.read_root(self.root_stream)
 
         # Load global symbols, if present
-        if not fast_load and self.streams[PDB_STREAM_DBI].gsym_file:
-            gsf = self.streams[PDB_STREAM_DBI].gsym_file
-            self.streams[gsf] = PDBGlobalSymbolStream(self.fp, self.streams[gsf].pages,
-                gsf, size=self.streams[gsf].size, page_size=self.page_size,
-                fast_load=self.fast_load)
+#        if not fast_load and self.streams[PDB_STREAM_DBI].gsym_file:
+#            gsf = self.streams[PDB_STREAM_DBI].gsym_file
+#            self.streams[gsf] = PDBGlobalSymbolStream(self.fp, self.streams[gsf].pages,
+#                gsf, size=self.streams[gsf].size, page_size=self.page_size,
+#                fast_load=self.fast_load)
 
 def parse(filename, fast_load=False):
     "Open a PDB file and autodetect its version"
