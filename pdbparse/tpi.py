@@ -638,7 +638,7 @@ subStruct = Struct("substructs",
             ),
             "LF_ENUMERATE": Struct("lfEnumerate",
                 CV_fldattr,
-                val("value"),
+                val("enum_value"),
                 Peek(ULInt8("_pad")),
                 PadAlign,
             ),
@@ -1106,8 +1106,9 @@ def parse_stream(fp, unnamed_hack=True):
     if unnamed_hack:
         for i in types:
             if (hasattr(types[i], 'name') and
-                    types[i].name == "__unnamed"):
-                types[i].name = types[i].name + ("_%x" % types[i].tpi_idx)
+                    (types[i].name == "__unnamed" or
+                     types[i].name == "<unnamed-tag>")):
+                types[i].name = "__unnamed" + ("_%x" % types[i].tpi_idx)
 
     return tpi_stream
 
