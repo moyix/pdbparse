@@ -50,7 +50,7 @@ def get_dbg_fname(dbgdata):
 
 def get_rsds(dbgdata):
     dbg = CV_RSDS_HEADER.parse(dbgdata)
-    guidstr = "%x%x%x%s%x" % (dbg.GUID.Data1, dbg.GUID.Data2, 
+    guidstr = "%08x%04x%04x%s%x" % (dbg.GUID.Data1, dbg.GUID.Data2, 
                               dbg.GUID.Data3, dbg.GUID.Data4.encode('hex'),
                               dbg.Age)
     filename = dbg.Filename.split('\\')[-1]
