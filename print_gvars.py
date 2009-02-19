@@ -2,17 +2,29 @@
 
 import sys
 import pdbparse
+from optparse import OptionParser
+
 from pdbparse.pe import Sections
 from pdbparse.omap import remap,OMAP_FROM_SRC
 
 def cstring(str):
     return str.split('\0')[0]
 
-pdb = pdbparse.parse(sys.argv[1])
-print len(pdb.streams)
+parser = OptionParser()
+parser.add_option("-n", "--no-omap",
+                  action="store_false", dest="omap", default=True,
+                  help="don't try to make use of OMAP information")
+(opts, args) = parser.parse_args()
+
+pdb = pdbparse.parse(args[0])
 sects = Sections.parse(pdb.streams[10].data)
 gsyms = pdb.streams[pdb.streams[3].gsym_file]
-omap = OMAP_FROM_SRC.parse(pdb.streams[12].data)
+
+if opts.omap:
+    omap = OMAP_FROM_SRC.parse(pdb.streams[12].data)
+else:
+    omap = None
+    remap = lambda x,y: x
 
 for sym in gsyms.globals:
     off = sym.offset
