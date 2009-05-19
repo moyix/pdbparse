@@ -1,7 +1,38 @@
 #!/usr/bin/env python
 
-import sys
 import pdbparse
+import random
+
+# Topological sort, by Paul Harrison
+# Found at:
+#   http://www.logarithmic.net/pfh-files/blog/01208083168/sort.py
+# License: Public domain
+def topological_sort(graph):
+    count = { }
+    for node in graph:
+        count[node] = 0
+    for node in graph:
+        for successor in graph[node]:
+            count[successor] += 1
+
+    ready = [ node for node in graph if count[node] == 0 ]
+    
+    result = [ ]
+    while ready:
+        node = ready.pop(-1)
+        result.append(node)
+        
+        for successor in graph[node]:
+            count[successor] -= 1
+            if count[successor] == 0:
+                ready.append(successor)
+    
+    return result
+
+def rand_str(length):
+    alphabet = "abcdefghijklmnopqrstuvwxyz"
+    alphabet += alphabet.upper()
+    return "".join(random.sample(alphabet,length))
 
 ARCH_PTR_SIZE = 4
 
@@ -11,7 +42,13 @@ snames = {
     "LF_UNION": "union",
 }
 
-ctype  = {
+ctype = {}
+ptr_str = None
+fptr_str = None
+struct_pretty_str = None
+
+# Microsoft Visual Studio "theme"
+ctype_msvc  = {
     "T_32PINT4": "PLONG",
     "T_32PRCHAR": "PUCHAR",
     "T_32PUCHAR": "PUCHAR",
@@ -37,6 +74,35 @@ ctype  = {
     "T_USHORT": "USHORT",
     "T_WCHAR": "WCHAR",
     "T_VOID": "VOID",
+}
+
+# Introspection "theme" for a 32-bit target
+ctype_intro  = {
+    "T_32PINT4": "uint32_t",
+    "T_32PRCHAR": "uint32_t",
+    "T_32PUCHAR": "uint32_t",
+    "T_32PULONG": "uint32_t",
+    "T_32PLONG": "uint32_t",
+    "T_32PUQUAD": "uint32_t",
+    "T_32PUSHORT": "uint32_t",
+    "T_32PVOID": "uint32_t",
+    "T_64PVOID": "uint32_t",
+    "T_INT4": "int32_t",
+    "T_INT8": "int64_t",
+    "T_LONG": "int32_t",
+    "T_QUAD": "int64_t",
+    "T_RCHAR": "uint8_t",
+    "T_REAL32": "float",
+    "T_REAL64": "double",
+    "T_REAL80": "long double",
+    "T_SHORT": "int16_t",
+    "T_UCHAR": "uint8_t",
+    "T_UINT4": "uint32_t",
+    "T_ULONG": "uint32_t",
+    "T_UQUAD": "uint64_t",
+    "T_USHORT": "uint16_t",
+    "T_WCHAR": "uint16_t",
+    "T_VOID": "void",
 }
 
 base_type_size = {
@@ -94,7 +160,10 @@ def proc_arglist(proc):
         argstrs.append(get_tpname(a))
     return argstrs
 
-def fptr_str(fptr,name):
+def fptr_str_intro(fptr,name):
+    return "uint32_t %s" % name
+
+def fptr_str_std(fptr,name):
     stars = ""
     while fptr.leaf_type == "LF_POINTER":
         stars += "*"
@@ -105,6 +174,10 @@ def fptr_str(fptr,name):
 
 def demangle(nm):
     if nm.startswith("_"): return nm[1:]
+    else: return nm
+
+def mangle(nm):
+    if not nm.startswith("_"): return "_" + nm
     else: return nm
 
 def get_size(lf):
@@ -119,6 +192,22 @@ def get_size(lf):
     elif lf.leaf_type == "LF_MODIFIER":
         return get_size(lf.modified_type)
     else: return -1
+
+def get_basetype(lf):
+    if isinstance(lf, str):
+        return None
+    elif (lf.leaf_type == "LF_STRUCTURE" or
+          lf.leaf_type == "LF_ENUM" or
+          lf.leaf_type == "LF_UNION"):
+        return lf
+    elif lf.leaf_type == "LF_POINTER":
+        return get_basetype(lf.utype)
+    elif lf.leaf_type == "LF_ARRAY":
+        return get_basetype(lf.element_type)
+    elif lf.leaf_type == "LF_MODIFIER":
+        return get_basetype(lf.modified_type)
+    else:
+        return None
 
 def get_tpname(lf, name=None):
     if isinstance(lf, str):
@@ -145,7 +234,10 @@ def bit_str(bitf, name):
 
 def arr_str(arr, name):
     tpname = get_tpname(arr.element_type)
-    count = arr.size / get_size(arr.element_type) 
+    sz = get_size(arr.element_type)
+    if sz == 0:
+        print "ERROR with array %s %s" % (tpname, name)
+    count = arr.size / sz
     return "%s %s[%d]" % (tpname, name, count)
 
 def mod_str(mod, name):
@@ -155,7 +247,13 @@ def mod_str(mod, name):
     if name: tpname += " " + name
     return tpname
 
-def ptr_str(ptr, name):
+def ptr_str_intro(ptr, name):
+    if name:
+        return "uint32_t %s" % name
+    else:
+        return "uint32_t"
+
+def ptr_str_std(ptr, name):
     tpname = get_tpname(ptr.utype)
     if name:
         return "P%s %s" % (tpname, name)
@@ -165,7 +263,7 @@ def ptr_str(ptr, name):
 def proc_str(proc, name):
     argstrs = proc_arglist(proc)
     ret_type = get_tpname(proc.return_type)
-    if not name: name = "func"
+    if not name: name = "func_" + rand_str(5)
     return "%s (*%s)(%s)" % (ret_type, name, ", ".join(argstrs))
 
 def memb_str(memb, indent=""):
@@ -227,31 +325,103 @@ def flstr(lf, indent=""):
         flstr += indent + "%s = %s%s\n" % (e.name, e_val, comma)
     return flstr
 
-def struct_pretty_str(lf):
-    print "typedef struct %s { // %#x bytes" % (lf.name, lf.size)
+def struct_dependencies(lf):
+    deps = set()
+    members = [ s for s in lf.fieldlist.substructs if s.leaf_type == "LF_MEMBER" ]
+    for memb in members:
+        base = get_basetype(memb.index)
+        if base and not (is_inline_struct(base) or memb.index.leaf_type =="LF_POINTER"):
+            deps.add(base)
+    return deps
+
+def struct_pretty_str_fwd(lf):
+    print "struct %s { // %#x bytes" % (mangle(lf.name), lf.size)
+    print flstr(lf, indent="    ")
+    print "};"
+    print
+
+def struct_pretty_str_nofwd(lf):
+    print "typedef struct %s { // %#x bytes" % (mangle(lf.name), lf.size)
     print flstr(lf, indent="    ")
     print "} %s, *P%s, **PP%s ;" % ((demangle(lf.name),)*3)
     print
 
 def enum_pretty_str(enum):
-    if not enum.name.startswith("_"):
-        name = "_" + enum.name
-    else: name = enum.name
-    print "typedef enum %s {" % name
+    #if not enum.name.startswith("_"):
+    #    name = "_" + enum.name
+    #else: name = enum.name
+    print "typedef enum %s {" % mangle(enum.name)
     print flstr(enum, indent="    ")
-    print "} %s;" % demangle(name)
+    print "} %s;" % demangle(enum.name)
     print
 
-pdb = pdbparse.parse(sys.argv[1])
-structs = [ s for s in pdb.streams[2].types.values() if (s.leaf_type == "LF_STRUCTURE" or s.leaf_type == "LF_UNION") and not s.prop.fwdref ]
-enums = [ e for e in pdb.streams[2].types.values() if e.leaf_type == "LF_ENUM" and not e.prop.fwdref ]
+themes = {
+    "msvc": ctype_msvc,
+    "intro": ctype_intro,
+}
 
-print "/*******  Structures  *******/"
-for s in structs:
-    if "unnamed" in s.name: continue
-    struct_pretty_str(s)
+theme_func = {
+    "msvc": {
+        "ptr_str": ptr_str_std,
+        "fptr_str": fptr_str_std,
+    },
+    "intro": {
+        "ptr_str": ptr_str_intro,
+        "fptr_str": fptr_str_intro,
+    },
+}
 
-print "/******* Enumerations *******/"
-for e in enums:
-    if "unnamed" in s.name: continue
-    enum_pretty_str(e)
+if __name__ == "__main__":
+    from optparse import OptionParser
+    parser = OptionParser()
+    parser.add_option("-t", "--theme", dest="theme",
+                      help="theme to use for C types [%s]" % ", ".join(themes),
+                      default="msvc")
+    parser.add_option("-f", "--fwdrefs", dest="fwdrefs", action="store_true",
+                      help="emit forward references", default=False)
+    opts,args = parser.parse_args()
+    ctype = themes[opts.theme]
+    ptr_str = theme_func[opts.theme]["ptr_str"]
+    fptr_str = theme_func[opts.theme]["fptr_str"]
+    if opts.fwdrefs:
+        struct_pretty_str = struct_pretty_str_fwd
+    else:
+        struct_pretty_str =  struct_pretty_str_nofwd
+
+    if opts.fwdrefs:
+        pdb = pdbparse.parse(args[0], fast_load=True)
+        pdb.streams[2].load(elim_fwdrefs=False)
+    else:
+        pdb = pdbparse.parse(args[0])
+        
+    if opts.fwdrefs:
+        fwdrefs = [ s for s in pdb.streams[2].types.values() if (s.leaf_type == "LF_STRUCTURE" or s.leaf_type == "LF_UNION") and s.prop.fwdref ]
+        print "/******* Forward Refs *******/"
+        for f in fwdrefs:
+            print "struct %s;" % mangle(f.name)
+            print "typedef struct %s %s;" % (mangle(f.name), demangle(f.name))
+        print
+        # Reload the file without fwdrefs as it messes up type sizes
+        pdb = pdbparse.parse(args[0])
+
+    structs = [ s for s in pdb.streams[2].types.values() if (s.leaf_type == "LF_STRUCTURE" or s.leaf_type == "LF_UNION") and not s.prop.fwdref ]
+    enums = [ e for e in pdb.streams[2].types.values() if e.leaf_type == "LF_ENUM" and not e.prop.fwdref ]
+
+    dep_graph = {}
+    for s in structs:
+        if "unnamed" in s.name: continue
+        #print s.name, [d.name for d in struct_dependencies(s)] 
+        dep_graph[s] = struct_dependencies(s)
+    dep_graph.update((e,[]) for e in enums)
+    structs = topological_sort(dep_graph)
+    structs.reverse()
+
+    print "/******* Enumerations *******/"
+    for e in enums:
+        enum_pretty_str(e)
+
+    print "/*******  Structures  *******/"
+    for s in structs:
+        if "unnamed" in s.name: continue
+        if s.leaf_type == "LF_ENUM": continue
+        struct_pretty_str(s)

@@ -1025,7 +1025,7 @@ def rename_2_7(lf):
     if lf.leaf_type.endswith("_ST"):
         lf.leaf_type = lf.leaf_type[:-3]
 
-def parse_stream(fp, unnamed_hack=True):
+def parse_stream(fp, unnamed_hack=True, elim_fwdrefs=True):
     """Parse a TPI stream.
 
     fp: a file-like object that holds the type data to be parsed. Must
@@ -1080,28 +1080,29 @@ def parse_stream(fp, unnamed_hack=True):
     # 6. Attempt to eliminate forward refs
     # Not possible to eliminate all fwdrefs; some may not be in
     # this PDB file (eg _UNICODE_STRING in ntoskrnl.pdb)
-    # Get list of fwdrefs
-    fwdrefs = {}
-    for i in types:
-        if hasattr(types[i], 'prop') and types[i].prop.fwdref:
-            fwdrefs[types[i].name] = i
-    # Map them to the real type
-    fwdref_map = {}
-    for i in types:
-        if (hasattr(types[i], 'name') and hasattr(types[i], 'prop') and
-            not types[i].prop.fwdref):
-            if types[i].name in fwdrefs:
-                fwdref_map[fwdrefs[types[i].name]] = types[i].tpi_idx
-    # Change any references to the fwdref to point to the real type
-    for i in types:
-        if types[i].leaf_type == "LF_FIELDLIST":
-            types[i].substructs = ListContainer([ 
-                merge_fwdrefs(t, types, fwdref_map) for t in types[i].substructs
-            ])
-        else:
-            types[i] = merge_fwdrefs(types[i], types, fwdref_map)
-    # Get rid of the resolved fwdrefs
-    for i in fwdref_map: del types[i]
+    if elim_fwdrefs:
+        # Get list of fwdrefs
+        fwdrefs = {}
+        for i in types:
+            if hasattr(types[i], 'prop') and types[i].prop.fwdref:
+                fwdrefs[types[i].name] = i
+        # Map them to the real type
+        fwdref_map = {}
+        for i in types:
+            if (hasattr(types[i], 'name') and hasattr(types[i], 'prop') and
+                not types[i].prop.fwdref):
+                if types[i].name in fwdrefs:
+                    fwdref_map[fwdrefs[types[i].name]] = types[i].tpi_idx
+        # Change any references to the fwdref to point to the real type
+        for i in types:
+            if types[i].leaf_type == "LF_FIELDLIST":
+                types[i].substructs = ListContainer([ 
+                    merge_fwdrefs(t, types, fwdref_map) for t in types[i].substructs
+                ])
+            else:
+                types[i] = merge_fwdrefs(types[i], types, fwdref_map)
+        # Get rid of the resolved fwdrefs
+        for i in fwdref_map: del types[i]
 
     if unnamed_hack:
         for i in types:
@@ -1112,8 +1113,8 @@ def parse_stream(fp, unnamed_hack=True):
 
     return tpi_stream
 
-def parse(data, unnamed_hack=True):
-    return parse_stream(StringIO(data), unnamed_hack)
+def parse(data, unnamed_hack=True, elim_fwdrefs=True):
+    return parse_stream(StringIO(data), unnamed_hack, elim_fwdrefs)
     
 if __name__ == "__main__":
     import sys

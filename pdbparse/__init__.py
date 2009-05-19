@@ -198,9 +198,9 @@ class PDBTypeStream(PDBStream):
         PDBStream.__init__(self, fp, pages, index, size=size, page_size=page_size)
         if fast_load: return
         else: self.load()
-    def load(self):
+    def load(self,unnamed_hack=True,elim_fwdrefs=True):
         import tpi
-        tpis = tpi.parse_stream(self.stream_file)
+        tpis = tpi.parse_stream(self.stream_file,unnamed_hack,elim_fwdrefs)
         self.header = tpis.TPIHeader
         self.num_types = self.header.ti_max - self.header.ti_min
         self.types = tpis.types
