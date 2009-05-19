@@ -330,8 +330,10 @@ def struct_dependencies(lf):
     members = [ s for s in lf.fieldlist.substructs if s.leaf_type == "LF_MEMBER" ]
     for memb in members:
         base = get_basetype(memb.index)
-        if base and not (is_inline_struct(base) or memb.index.leaf_type =="LF_POINTER"):
+        if base and not (memb.index.leaf_type =="LF_POINTER"):
             deps.add(base)
+            if is_inline_struct(base):
+                deps.add(struct_dependencies(base))
     return deps
 
 def struct_pretty_str_fwd(lf):
