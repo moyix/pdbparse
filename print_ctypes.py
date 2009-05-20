@@ -332,7 +332,7 @@ def struct_dependencies(lf):
         base = get_basetype(memb.index)
         if base and not (memb.index.leaf_type =="LF_POINTER"):
             if is_inline_struct(base):
-                deps.union(struct_dependencies(base))
+                deps = deps | struct_dependencies(base)
             else:
                 deps.add(base)
     return deps
