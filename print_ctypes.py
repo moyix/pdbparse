@@ -331,9 +331,10 @@ def struct_dependencies(lf):
     for memb in members:
         base = get_basetype(memb.index)
         if base and not (memb.index.leaf_type =="LF_POINTER"):
-            deps.add(base)
             if is_inline_struct(base):
-                deps.add(struct_dependencies(base))
+                deps.union(struct_dependencies(base))
+            else:
+                deps.add(base)
     return deps
 
 def struct_pretty_str_fwd(lf):
@@ -412,7 +413,7 @@ if __name__ == "__main__":
     dep_graph = {}
     for s in structs:
         if "unnamed" in s.name: continue
-        #print s.name, [d.name for d in struct_dependencies(s)] 
+        print s.name, [d.name for d in struct_dependencies(s)] 
         dep_graph[s] = struct_dependencies(s)
     dep_graph.update((e,[]) for e in enums)
     structs = topological_sort(dep_graph)
