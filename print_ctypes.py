@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import sys
 import pdbparse
 import random
 
@@ -191,7 +192,11 @@ def get_size(lf):
         return ARCH_PTR_SIZE
     elif lf.leaf_type == "LF_MODIFIER":
         return get_size(lf.modified_type)
-    else: return -1
+    elif lf.leaf_type == "LF_ENUM":
+        return get_size("T_INT4")
+    else:
+        print >>sys.stderr, "ERROR: don't know how to get size for %s" % lf.leaf_type
+        return -1
 
 def get_basetype(lf):
     if isinstance(lf, str):
@@ -236,9 +241,14 @@ def arr_str(arr, name):
     tpname = get_tpname(arr.element_type)
     sz = get_size(arr.element_type)
     if sz == 0:
-        print "ERROR with array %s %s" % (tpname, name)
+        print >>sys.stderr,"ERROR with array %s %s" % (tpname, name)
+    if sz < 0:
+        print >>sys.stderr,"ERROR with array %s %s -- element size is negative" % (tpname, name)
+    if arr.size < 0:
+        print >>sys.stderr,"ERROR with array %s %s -- size is negative" % (tpname, name)
     count = arr.size / sz
-    return "%s %s[%d]" % (tpname, name, count)
+    return memb_str(arr.element_type, "%s[%d]" % (name,count), indent="    ")
+    #return "%s %s[%d]" % (tpname, name, count)
 
 def mod_str(mod, name):
     tpname = get_tpname(mod.modified_type)
@@ -266,18 +276,22 @@ def proc_str(proc, name):
     if not name: name = "func_" + rand_str(5)
     return "%s (*%s)(%s)" % (ret_type, name, ", ".join(argstrs))
 
-def memb_str(memb, indent=""):
-    off = memb.offset
-    if is_function_pointer(memb.index):
-        tpname = fptr_str(memb.index, memb.name)
-    elif is_inline_struct(memb.index):
-        sname = snames[memb.index.leaf_type]
+def memb_str(memb, name, off=-1, indent=""):
+    #if not name: name = memb.name
+    #off = memb.offset
+    if is_function_pointer(memb):
+        tpname = fptr_str(memb, name)
+    elif is_inline_struct(memb):
+        sname = snames[memb.leaf_type]
         tpname = sname + " {\n"
-        tpname += flstr(memb.index,indent=indent+"    ")
-        tpname += indent + "} " + memb.name
+        tpname += flstr(memb,indent=indent+"    ")
+        tpname += indent + "} " + name
     else:
-        tpname = get_tpname(memb.index, memb.name)
-    return (off,"%s ; // offset %#x" % (tpname, off))
+        tpname = get_tpname(memb, name)
+    if off != -1:
+        return (off,"%s ; // offset %#x" % (tpname, off))
+    else:
+        return "%s" % tpname
 
 def unionize(member_list):
     new_mlist = []
@@ -307,7 +321,7 @@ def unionize(member_list):
 
 def flstr(lf, indent=""):
     flstr = ""
-    memb_strs = [ memb_str(s,indent) for s in lf.fieldlist.substructs if s.leaf_type == "LF_MEMBER" ]
+    memb_strs = [ memb_str(s.index,s.name,s.offset,indent) for s in lf.fieldlist.substructs if s.leaf_type == "LF_MEMBER" ]
     for m in unionize(memb_strs):
         if isinstance(m,list):
             flstr += indent + "union {\n"
@@ -413,7 +427,7 @@ if __name__ == "__main__":
     dep_graph = {}
     for s in structs:
         if "unnamed" in s.name: continue
-        print s.name, [d.name for d in struct_dependencies(s)] 
+        #print s.name, [d.name for d in struct_dependencies(s)] 
         dep_graph[s] = struct_dependencies(s)
     dep_graph.update((e,[]) for e in enums)
     structs = topological_sort(dep_graph)
