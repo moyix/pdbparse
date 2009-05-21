@@ -5,7 +5,7 @@ import pdbparse
 from optparse import OptionParser
 
 from pdbparse.pe import Sections
-from pdbparse.omap import remap,OMAP_FROM_SRC
+from pdbparse.omap import remap,OMAP_ENTRIES
 
 def cstring(str):
     return str.split('\0')[0]
@@ -21,7 +21,7 @@ sects = Sections.parse(pdb.streams[10].data)
 gsyms = pdb.streams[pdb.streams[3].gsym_file]
 
 if opts.omap:
-    omap = OMAP_FROM_SRC.parse(pdb.streams[12].data)
+    omap = OMAP_ENTRIES.parse(pdb.streams[12].data)
 else:
     omap = None
     remap = lambda x,y: x
