@@ -352,13 +352,13 @@ def struct_dependencies(lf):
     return deps
 
 def struct_pretty_str_fwd(lf):
-    print "struct %s { // %#x bytes" % (mangle(lf.name), lf.size)
+    print "%s %s { // %#x bytes" % (snames[lf.leaf_type], mangle(lf.name), lf.size)
     print flstr(lf, indent="    ")
     print "};"
     print
 
 def struct_pretty_str_nofwd(lf):
-    print "typedef struct %s { // %#x bytes" % (mangle(lf.name), lf.size)
+    print "typedef %s %s { // %#x bytes" % (snames[lf.leaf_type], mangle(lf.name), lf.size)
     print flstr(lf, indent="    ")
     print "} %s, *P%s, **PP%s ;" % ((demangle(lf.name),)*3)
     print
