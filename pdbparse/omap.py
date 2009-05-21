@@ -3,18 +3,12 @@
 from construct import *
 from bisect import bisect
 
-OMAP_FROM_SRC_ENTRY = Struct("OmapFromSrc",
+OMAP_ENTRY = Struct("OmapFromSrc",
     ULInt32("From"),
     ULInt32("To"),
 )
 
-OMAP_TO_SRC_ENTRY = Struct("OmapToSrc",
-    ULInt32("To"),
-    ULInt32("From"),
-)
-
-OMAP_FROM_SRC = GreedyRange(OMAP_FROM_SRC_ENTRY)
-OMAP_TO_SRC = GreedyRange(OMAP_TO_SRC_ENTRY)
+OMAP_ENTRIES = GreedyRange(OMAP_ENTRY)
 
 def remap(address, omap):
     froms = [o.From for o in omap]
