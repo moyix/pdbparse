@@ -30,6 +30,10 @@ values = [
     SyscallTable(0,0,0),
 ]
 
+if len(sys.argv) != 3:
+    print >> sys.stderr, "usage: %s <exe> <pdb>" % sys.argv[0]
+    sys.exit(1)
+
 pe = PE(sys.argv[1])
 pdb = pdbparse.parse(sys.argv[2])
 sects = Sections.parse(pdb.streams[10].data)
