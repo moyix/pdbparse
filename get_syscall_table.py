@@ -5,6 +5,7 @@ import pdbparse
 from struct import unpack
 from pdbparse.pe import Sections
 from pdbparse.omap import remap,OMAP_ENTRIES
+from pdbparse.undecorate import undecorate
 from pefile import PE
 from collections import namedtuple
 
@@ -48,15 +49,15 @@ for tbl,addr in zip(names,addrs):
         if sym.name == tbl.ServiceTable:
             value = remap(off+virt_base,omap)
             addr.ServiceTable = value
-            print tbl.ServiceTable,hex(remap(off+virt_base,omap))
+            #print tbl.ServiceTable,hex(remap(off+virt_base,omap))
         elif sym.name == tbl.ServiceLimit:
             value = remap(off+virt_base,omap)
             addr.ServiceLimit = value
-            print tbl.ServiceLimit,hex(value)
+            #print tbl.ServiceLimit,hex(value)
         elif sym.name == tbl.ArgumentTable:
             value = remap(off+virt_base,omap)
             addr.ArgumentTable = value
-            print tbl.ArgumentTable,hex(value)
+            #print tbl.ArgumentTable,hex(value)
 
 for addr,val in zip(addrs,values):
     if not addr.ServiceTable: continue
@@ -92,6 +93,6 @@ for i,val in enumerate(values):
     if not val.ServiceTable: continue
     for j in range(val.ServiceLimit):
         ordinal = i << 12 | j
-        print "Ordinal %#06x Name: %s Args: %d (%#x bytes) Offset: %#x" % (ordinal, function_names[ordinal],
+        print "Ordinal %#06x Name: %s Args: %d (%#x bytes) Offset: %#x" % (ordinal, undecorate(function_names[ordinal])[0],
                                                                        val.ArgumentTable[j] / 4, val.ArgumentTable[j],
                                                                        val.ServiceTable[j])
