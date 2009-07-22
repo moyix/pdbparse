@@ -83,9 +83,8 @@ def download_file(guid,fname,path=""):
     # the GUID argument should therefore be longer to be valid.
     # Exception: old-style PEs without a debug section use 
     # TimeDateStamp+SizeOfImage
-    if len(guid) < 33:
+    if len(guid) == 32:
         print "Warning: GUID is too short to be valid. Did you append the Age field?"
-        print "(you can safely ignore this warning if using TimeDateStamp+SizeOfImage)"
 
     url = "http://msdl.microsoft.com/download/symbols/%s/%s/" % (fname,guid)
     opener = urllib2.build_opener()
