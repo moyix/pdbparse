@@ -10,12 +10,21 @@ OMAP_ENTRY = Struct("OmapFromSrc",
 
 OMAP_ENTRIES = GreedyRange(OMAP_ENTRY)
 
-def remap(address, omap):
-    froms = [o.From for o in omap]
-    #print len(froms)
-    pos = bisect(froms, address)
-    #print pos
-    if froms[pos] != address: pos = pos - 1
+class Omap(object):
+    def __init__(self, omapstream):
+        self.omap = OMAP_ENTRIES.parse(omapstream)
 
-    if omap[pos].To == 0: return omap[pos].To
-    else: return omap[pos].To + (address - omap[pos].From)
+        self._froms = None
+
+    def remap(self, address):
+        if not self._froms:
+            self._froms = [o.From for o in self.omap]
+
+        pos = bisect(self._froms, address)
+        if self._froms[pos] != address:
+            pos = pos - 1
+
+        if self.omap[pos].To == 0:
+            return self.omap[pos].To
+        else:
+            return self.omap[pos].To + (address - self.omap[pos].From)

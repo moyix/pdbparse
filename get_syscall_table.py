@@ -4,7 +4,7 @@ import sys
 import pdbparse
 from struct import unpack
 from pdbparse.pe import Sections
-from pdbparse.omap import remap,OMAP_ENTRIES
+from pdbparse.omap import Omap
 from pdbparse.undecorate import undecorate
 from pefile import PE
 from collections import namedtuple
@@ -39,8 +39,8 @@ pdb = pdbparse.parse(sys.argv[2])
 sects = Sections.parse(pdb.streams[10].data)
 orig_sects = Sections.parse(pdb.streams[13].data)
 gsyms = pdb.streams[pdb.streams[3].gsym_file]
-omap = OMAP_ENTRIES.parse(pdb.streams[12].data)
-omap_rev = OMAP_ENTRIES.parse(pdb.streams[11].data)
+omap = Omap(pdb.streams[12].data)
+omap_rev = Omap(pdb.streams[11].data)
 
 for tbl,addr in zip(names,addrs):
     for sym in gsyms.globals:
@@ -51,15 +51,15 @@ for tbl,addr in zip(names,addrs):
         off = sym.offset
 
         if sym.name == tbl.ServiceTable:
-            value = remap(off+virt_base,omap)
+            value = omap.remap(off+virt_base)
             addr.ServiceTable = value
-            #print tbl.ServiceTable,hex(remap(off+virt_base,omap))
+            #print tbl.ServiceTable,hex(omap.remap(off+virt_base))
         elif sym.name == tbl.ServiceLimit:
-            value = remap(off+virt_base,omap)
+            value = omap.remap(off+virt_base)
             addr.ServiceLimit = value
             #print tbl.ServiceLimit,hex(value)
         elif sym.name == tbl.ArgumentTable:
-            value = remap(off+virt_base,omap)
+            value = omap.remap(off+virt_base)
             addr.ArgumentTable = value
             #print tbl.ArgumentTable,hex(value)
 
@@ -79,7 +79,7 @@ function_names = {}
 
 for i,val in enumerate(values):
     if not val.ServiceTable: continue
-    remapped = [remap(f,omap_rev) for f in val.ServiceTable]
+    remapped = [omap_rev.remap(f) for f in val.ServiceTable]
     for sym in gsyms.globals:
         try:
             virt_base = sects[sym.segment-1].VirtualAddress

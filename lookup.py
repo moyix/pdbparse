@@ -6,7 +6,7 @@ from operator import itemgetter,attrgetter
 from bisect import bisect_right
 from struct import unpack
 from pdbparse.pe import Sections
-from pdbparse.omap import remap,OMAP_ENTRIES
+from pdbparse.omap import Omap
 from pdbparse.undecorate import undecorate
 
 try:
@@ -38,8 +38,8 @@ for pdbname,basestr,BASE in mods:
     sects = Sections.parse(pdb.streams[BASE].data)
     orig_sects = Sections.parse(pdb.streams[BASE+3].data)
     gsyms = pdb.streams[pdb.streams[3].gsym_file]
-    omap = OMAP_ENTRIES.parse(pdb.streams[BASE+2].data)
-    omap_rev = OMAP_ENTRIES.parse(pdb.streams[BASE+1].data)
+    omap = Omap(pdb.streams[BASE+2].data)
+    omap_rev = Omap(pdb.streams[BASE+1].data)
 
     last_sect = max(sects, key=attrgetter('VirtualAddress'))
     limit = base + last_sect.VirtualAddress + last_sect.Misc.VirtualSize
@@ -54,7 +54,7 @@ for pdbname,basestr,BASE in mods:
         except IndexError:
             continue
 
-        mapped = remap(off+virt_base,omap) + base
+        mapped = omap.remap(off+virt_base) + base
         addrs[base,limit]['addrs'].append((mapped,sym.name))
 
     addrs[base,limit]['addrs'].sort(key=itemgetter(0))
