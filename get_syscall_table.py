@@ -14,10 +14,12 @@ class SyscallTable(object):
         self.ServiceTable = ServiceTable
         self.ServiceLimit = ServiceLimit
         self.ArgumentTable = ArgumentTable
+    def __repr__(self):
+        return "SyscallTable(%s,%s,%s)" % (self.ServiceTable, self.ServiceLimit, self.ArgumentTable)
 
 names = [
-    SyscallTable('_KiServiceTable', '_KiServiceLimit', '_KiArgumentTable'),
-    SyscallTable('_W32pServiceTable', '_W32pServiceLimit', '_W32pArgumentTable'),
+    SyscallTable('KiServiceTable', 'KiServiceLimit', 'KiArgumentTable'),
+    SyscallTable('W32pServiceTable', 'W32pServiceLimit', 'W32pArgumentTable'),
 ]
 
 addrs = [
@@ -42,6 +44,8 @@ gsyms = pdb.streams[pdb.streams[3].gsym_file]
 omap = Omap(pdb.streams[12].data)
 omap_rev = Omap(pdb.streams[11].data)
 
+print gsyms.globals
+
 for tbl,addr in zip(names,addrs):
     for sym in gsyms.globals:
         try:
@@ -50,18 +54,20 @@ for tbl,addr in zip(names,addrs):
             continue
         off = sym.offset
 
-        if sym.name == tbl.ServiceTable:
+        if tbl.ServiceTable in sym.name:
             value = omap.remap(off+virt_base)
             addr.ServiceTable = value
             #print tbl.ServiceTable,hex(omap.remap(off+virt_base))
-        elif sym.name == tbl.ServiceLimit:
+        elif tbl.ServiceLimit in sym.name:
             value = omap.remap(off+virt_base)
             addr.ServiceLimit = value
             #print tbl.ServiceLimit,hex(value)
-        elif sym.name == tbl.ArgumentTable:
+        elif tbl.ArgumentTable in sym.name:
             value = omap.remap(off+virt_base)
             addr.ArgumentTable = value
             #print tbl.ArgumentTable,hex(value)
+
+print addrs
 
 for addr,val in zip(addrs,values):
     if not addr.ServiceTable: continue
