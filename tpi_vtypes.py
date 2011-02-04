@@ -99,6 +99,16 @@ def member_str(m):
         return "['%s']" % m.name
     elif m.leaf_type == "LF_PROCEDURE":
         return "['void']"
+    elif m.leaf_type == "LF_BITFIELD":
+        # TODO: add in base type support here later
+        return "['BitField', dict(start_bit = %d, end_bit = %d)]" % (m.position, m.position+m.length)
+    elif m.leaf_type == "LF_ENUM":
+        enum_membs = [ e for e in m.fieldlist.substructs if e.leaf_type == "LF_ENUMERATE" ]
+        choices = {}
+        for e in enum_membs:
+            e_val = -1 if e.enum_value == '\xff' else e.enum_value
+            choices[e_val] = e.name
+        return "['Enumeration', dict(target = %s, choices = %s)]" % (vtype[m.utype], choices)
     else:
         return "[UNIMPLEMENTED %s]" % m.leaf_type
 
