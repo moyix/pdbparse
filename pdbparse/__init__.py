@@ -250,11 +250,10 @@ class PDBGlobalSymbolStream(PDBStream):
             elif g.symtype == 2:
                 self.funcs[g.name] = g
 
-
-
 # Class mappings for the stream types
 _stream_types7 = {
-    PDB_STREAM_ROOT: PDB7RootStream,
+# Removing this: it's redundant and causing problems
+#    PDB_STREAM_ROOT: PDB7RootStream,
     PDB_STREAM_TPI: PDBTypeStream,
     PDB_STREAM_PDB: PDBInfoStream,
     PDB_STREAM_DBI: PDBDebugStream,
