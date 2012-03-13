@@ -38,13 +38,10 @@ if len(sys.argv) != 3:
 
 pe = PE(sys.argv[1])
 pdb = pdbparse.parse(sys.argv[2])
-sects = Sections.parse(pdb.streams[10].data)
-orig_sects = Sections.parse(pdb.streams[13].data)
-gsyms = pdb.streams[pdb.streams[3].gsym_file]
-omap = Omap(pdb.streams[12].data)
-omap_rev = Omap(pdb.streams[11].data)
-
-print gsyms.globals
+sects = pdb.STREAM_SECT_HDR_ORIG.sections
+gsyms = pdb.STREAM_GSYM
+omap = pdb.STREAM_OMAP_FROM_SRC
+omap_rev = pdb.STREAM_OMAP_TO_SRC
 
 for tbl,addr in zip(names,addrs):
     for sym in gsyms.globals:
@@ -66,8 +63,6 @@ for tbl,addr in zip(names,addrs):
             value = omap.remap(off+virt_base)
             addr.ArgumentTable = value
             #print tbl.ArgumentTable,hex(value)
-
-print addrs
 
 for addr,val in zip(addrs,values):
     if not addr.ServiceTable: continue
