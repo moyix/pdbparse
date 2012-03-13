@@ -134,11 +134,13 @@ op.add_option("-a", "--arch-ptr-size", dest="arch_ptr_size", type=int, default=0
 if len(args) < 1:
     op.error("a PDB file is required")
 
-pdb = pdbparse.parse(args[0])
+pdb = pdbparse.parse(args[0],fast_load=True)
+pdb.STREAM_TPI.load()
+pdb.STREAM_DBI.load()
 types = args[1:]
 
 if not opts.arch_ptr_size:
-    dbg = pdb.streams[pdbparse.PDB_STREAM_DEBUG]
+    dbg = pdb.STREAM_DBI
     if dbg.machine == 'IMAGE_FILE_MACHINE_AMD64':
         ARCH_PTR_SIZE = 8
     elif dbg.machine == 'IMAGE_FILE_MACHINE_IA64':
@@ -150,12 +152,12 @@ else:
 
 
 if not types:
-    structs = [ t for t in pdb.streams[2].types.values()
+    structs = [ t for t in pdb.STREAM_TPI.types.values()
                 if (t.leaf_type == 'LF_STRUCTURE' or t.leaf_type == "LF_UNION")
                 and not t.prop.fwdref ]
 else:
-    structs = [ pdb.streams[2].structures[t] for t in types
-                if not pdb.streams[2].structures[t].prop.fwdref ]
+    structs = [ pdb.STREAM_TPI.structures[t] for t in types
+                if not pdb.STREAM_TPI.structures[t].prop.fwdref ]
 
 if opts.name:
     print "%s = {" % opts.name
