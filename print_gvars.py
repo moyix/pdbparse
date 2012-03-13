@@ -16,17 +16,16 @@ parser.add_option("-n", "--no-omap",
                   help="don't try to make use of OMAP information")
 (opts, args) = parser.parse_args()
 
-if len(args) != 3:
-    parser.error("Need filename, base address, and first section offset")
+if len(args) != 2:
+    parser.error("Need filename and base address")
 
 pdb = pdbparse.parse(args[0])
 imgbase = int(args[1], 0)
-secbase = int(args[2], 0)
-sects = Sections.parse(pdb.streams[secbase].data)
-gsyms = pdb.streams[pdb.streams[3].gsym_file]
+sects = pdb.STREAM_SECT_HDR_ORIG.sections
+gsyms = pdb.STREAM_GSYM
 
 if opts.omap:
-    omap = Omap(pdb.streams[secbase+2].data)
+    omap = pdb.STREAM_OMAP_FROM_SRC
 else:
     class Dummy: pass
     omap = Dummy()
