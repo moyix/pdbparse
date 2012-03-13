@@ -4,8 +4,6 @@ import pdbparse
 import sys
 from os.path import basename
 
-ARCH_PTR_SIZE = 4
-
 vtype  = {
     "T_32PINT4": "'pointer', ['long']",
     "T_32PRCHAR": "'pointer', ['unsigned char']",
@@ -87,7 +85,12 @@ def member_str(m):
     if isinstance(m, str):
         return "[%s]" % vtype[m]
     elif m.leaf_type == "LF_POINTER":
-        return "['pointer', %s]" % member_str(m.utype)
+        if ARCH_PTR_SIZE == 4:
+            return "['pointer', %s]" % member_str(m.utype)
+        elif ARCH_PTR_SIZE == 8:
+            return "['pointer64', %s]" % member_str(m.utype)
+        else:
+            raise NotImplementedError("Unsupported ARCH_PTR_SIZE=%d" % ARCH_PTR_SIZE)
     elif m.leaf_type == "LF_MODIFIER":
         return member_str(m.modified_type)
     elif m.leaf_type == "LF_ARRAY":
@@ -125,7 +128,11 @@ op.add_option("-i", "--include", dest="include",
                   help="include extra types in FILE", metavar="FILE")
 op.add_option("-n", "--name", dest="name",
                   help="place types in a dict named NAME", metavar="NAME")
+op.add_option("-a", "--arch-ptr-size", dest="arch_ptr_size", type=int, default=4,
+                  help="set architecture pointer size to SIZE in bytes", metavar="SIZE")
 (opts, args) = op.parse_args()
+
+ARCH_PTR_SIZE = opts.arch_ptr_size
 
 if len(args) < 1:
     op.error("a PDB file is required")
