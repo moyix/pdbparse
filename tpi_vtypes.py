@@ -103,8 +103,7 @@ def member_str(m):
     elif m.leaf_type == "LF_PROCEDURE":
         return "['void']"
     elif m.leaf_type == "LF_BITFIELD":
-        # TODO: add in base type support here later
-        return "['BitField', dict(start_bit = %d, end_bit = %d)]" % (m.position, m.position+m.length)
+        return "['BitField', dict(start_bit = %d, end_bit = %d, native_type=%s)]" % (m.position, m.position+m.length, member_str(m.base_type)[1:-1])
     elif m.leaf_type == "LF_ENUM":
         enum_membs = [ e for e in m.fieldlist.substructs if e.leaf_type == "LF_ENUMERATE" ]
         choices = {}
