@@ -71,7 +71,7 @@ def progress(blocks,blocksz,totalsz):
     lastprog = percent
     sys.stdout.flush()
 
-def download_file(guid,fname,path=""):
+def download_file(guid,fname,path="",quiet=False):
     ''' 
     Download the symbols specified by guid and filename. Note that 'guid'
     must be the GUID from the executable with the dashes removed *AND* the
@@ -93,15 +93,18 @@ def download_file(guid,fname,path=""):
     tries = [ fname[:-1] + '_', fname ]
 
     for t in tries:
-        print "Trying %s" % (url+t)
+        if not quiet: print "Trying %s" % (url+t)
+        outfile = os.path.join(path,t)
         try:
-            PDBOpener().retrieve(url+t, path+t, reporthook=progress)
-            print
-            print "Saved symbols to %s" % (path+t)
-            return path+t
+            hook = None if quiet else progress
+            PDBOpener().retrieve(url+t, outfile, reporthook=hook)
+            if not quiet:
+                print
+                print "Saved symbols to %s" % (outfile)
+            return outfile
         except urllib2.HTTPError, e:
-            print "HTTP error %u" % (e.code)
-            pass
+            if not quiet:
+                print "HTTP error %u" % (e.code)
     return None
 
 
