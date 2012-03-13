@@ -127,17 +127,27 @@ op.add_option("-i", "--include", dest="include",
                   help="include extra types in FILE", metavar="FILE")
 op.add_option("-n", "--name", dest="name",
                   help="place types in a dict named NAME", metavar="NAME")
-op.add_option("-a", "--arch-ptr-size", dest="arch_ptr_size", type=int, default=4,
+op.add_option("-a", "--arch-ptr-size", dest="arch_ptr_size", type=int, default=0,
                   help="set architecture pointer size to SIZE in bytes", metavar="SIZE")
 (opts, args) = op.parse_args()
-
-ARCH_PTR_SIZE = opts.arch_ptr_size
 
 if len(args) < 1:
     op.error("a PDB file is required")
 
 pdb = pdbparse.parse(args[0])
 types = args[1:]
+
+if not opts.arch_ptr_size:
+    dbg = pdb.streams[pdbparse.PDB_STREAM_DEBUG]
+    if dbg.machine == 'IMAGE_FILE_MACHINE_AMD64':
+        ARCH_PTR_SIZE = 8
+    elif dbg.machine == 'IMAGE_FILE_MACHINE_IA64':
+        ARCH_PTR_SIZE = 8
+    elif dbg.machine == 'IMAGE_FILE_MACHINE_I386':
+        ARCH_PTR_SIZE = 4
+else:
+    ARCH_PTR_SIZE = opts.arch_ptr_size
+
 
 if not types:
     structs = [ t for t in pdb.streams[2].types.values()

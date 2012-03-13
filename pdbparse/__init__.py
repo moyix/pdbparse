@@ -228,6 +228,7 @@ class PDBDebugStream(PDBStream):
         self.hash_size = debug.DBIHeader.hash_size
         self.srcmodule_size = debug.DBIHeader.srcmodule_size
         self.pdbimport_size = debug.DBIHeader.pdbimport_size
+        self.machine = debug.DBIHeader.Machine
         del debug
 
 class PDBGlobalSymbolStream(PDBStream):
