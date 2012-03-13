@@ -317,7 +317,7 @@ def get_flags(value, flags):
     return [k for (k,v) in flags["flags"].items() if (value & v) > 0]
 
 def mask(value, mask_dict, mask):
-    (mk,sh) = mask_dict[mask]
+    (mk,sh) = mask_dict['masks'][mask]
     return (value & mk) >> sh
 
 def null_terminate(st):
@@ -435,7 +435,7 @@ def print_fieldlist(data, idx):
             fmt = "<HHL"
             fmtl = calcsize(fmt)
             (lf,attr,index) = unpack(fmt,data[:fmtl])
-            (v,name,n) = mval(data[fmtl:])
+            (v,name,n) = mval(attr,data[fmtl:])
             print "  single method %s (type %#04x) vbase offset %#04x" % (name,index,v)
             sz = fmtl + n + len(name) + 1
             data = data[sz:]
@@ -444,7 +444,7 @@ def print_fieldlist(data, idx):
             fmtl = calcsize(fmt)
             (lf,count,index) = unpack(fmt,data[:fmtl])
             name = null_terminate(data[fmtl:])
-            print "  method list %s (type %#04x)" % (name,tp)
+            print "  method list %s (type %#04x)" % (name,index)
             sz = fmtl + len(name) + 1
             data = data[sz:]
         elif lf == types['LF_NESTTYPE']:
