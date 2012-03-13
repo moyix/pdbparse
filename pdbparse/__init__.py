@@ -89,13 +89,24 @@ class PDBStream:
         return data
     data = property(fget=_get_data)
 
-    def __init__(self, fp, pages, index, size=-1, page_size=0x1000, fast_load=False):
+    def __init__(self, fp, pages, index, size=-1, page_size=0x1000, fast_load=False, parent=None):
+        self.parent = parent
         self.pages = pages
         self.index = index
         self.page_size = page_size
         if size == -1: self.size = len(pages)*page_size
         else: self.size = size
         self.stream_file = StreamFile(fp, pages, size=size, page_size=page_size)
+
+class ParsedPDBStream(PDBStream):
+    def __init__(self, fp, pages, index=PDB_STREAM_PDB, size=-1,
+            page_size=0x1000, fast_load=False, parent=None):
+        PDBStream.__init__(self, fp, pages, index, size=size, page_size=page_size, fast_load=fast_load, parent=parent)
+        if fast_load: return
+        else: self.load()
+
+    def load(self):
+        pass
 
 class PDB7RootStream(PDBStream):
     """Class representing the root stream of a PDB file.
@@ -174,12 +185,7 @@ class PDB2RootStream(PDBStream):
         
         self.streams = zip(sizes, page_lists)
 
-class PDBInfoStream(PDBStream):
-    def __init__(self, fp, pages, index=PDB_STREAM_PDB, size=-1,
-            page_size=0x1000, fast_load=False):
-        PDBStream.__init__(self, fp, pages, index, size=size, page_size=page_size)
-        if fast_load: return
-        else: self.load()
+class PDBInfoStream(ParsedPDBStream):
     def load(self):
         import info
         from datetime import datetime
@@ -192,12 +198,7 @@ class PDBInfoStream(PDBStream):
         self.names = inf.names
         del inf
 
-class PDBTypeStream(PDBStream):
-    def __init__(self, fp, pages, index=PDB_STREAM_TPI, size=-1,
-            page_size=0x1000, fast_load=False):
-        PDBStream.__init__(self, fp, pages, index, size=size, page_size=page_size)
-        if fast_load: return
-        else: self.load()
+class PDBTypeStream(ParsedPDBStream):
     def load(self,unnamed_hack=True,elim_fwdrefs=True):
         import tpi
         tpis = tpi.parse_stream(self.stream_file,unnamed_hack,elim_fwdrefs)
@@ -208,35 +209,71 @@ class PDBTypeStream(PDBStream):
             if s.leaf_type == "LF_STRUCTURE" or s.leaf_type == "LF_STRUCTURE_ST")
         del tpis
 
-class PDBDebugStream(PDBStream):
-    def __init__(self, fp, pages, index=PDB_STREAM_PDB, size=-1,
-            page_size=0x1000, fast_load=False):
-        PDBStream.__init__(self, fp, pages, index, size=size, page_size=page_size)
-        if fast_load: return
-        else: self.load()
+class PDBDebugStream(ParsedPDBStream):
     def load(self):
         import dbi 
         debug = dbi.parse_stream(self.stream_file)
 
-        self.version = debug.DBIHeader.version
-        #self.unknown = debug.DBIHeader.unknown
-        self.hash1_file  = debug.DBIHeader.hash1_file
-        self.hash2_file = debug.DBIHeader.hash2_file
-        self.gsym_file = debug.DBIHeader.gsym_file
-        self.module_size = debug.DBIHeader.module_size
-        self.offset_size = debug.DBIHeader.offset_size
-        self.hash_size = debug.DBIHeader.hash_size
-        self.srcmodule_size = debug.DBIHeader.srcmodule_size
-        self.pdbimport_size = debug.DBIHeader.pdbimport_size
-        self.machine = debug.DBIHeader.Machine
-        del debug
+        self.DBIHeader = debug.DBIHeader
+        self.DBIExHeaders = debug.DBIExHeaders
+        self.DBIDbgHeader = debug.DBIDbgHeader        
 
-class PDBGlobalSymbolStream(PDBStream):
-    def __init__(self, fp, pages, index=PDB_STREAM_PDB, size=-1,
-            page_size=0x1000, fast_load=False):
-        PDBStream.__init__(self, fp, pages, index, size=size, page_size=page_size)
-        if fast_load: return
-        else: self.load()
+        # For backwards compatibility
+        self.gsym_file = debug.DBIHeader.symrecStream
+        self.machine = debug.DBIHeader.Machine
+
+        if self.parent:
+            if debug.DBIHeader.symrecStream != -1:
+                self.parent.add_supported_stream("STREAM_GSYM", debug.DBIHeader.symrecStream, PDBGlobalSymbolStream)
+            if debug.DBIDbgHeader.snSectionHdr != -1:
+                self.parent.add_supported_stream("STREAM_SECT_HDR", debug.DBIDbgHeader.snSectionHdr, PDBSectionStream)
+            if debug.DBIDbgHeader.snSectionHdrOrig != -1:
+                self.parent.add_supported_stream("STREAM_SECT_HDR_ORIG", debug.DBIDbgHeader.snSectionHdrOrig, PDBSectionStream)
+            if debug.DBIDbgHeader.snOmapToSrc != -1:
+                self.parent.add_supported_stream("STREAM_OMAP_TO_SRC", debug.DBIDbgHeader.snOmapToSrc, PDBOmapStream)
+            if debug.DBIDbgHeader.snOmapFromSrc != -1:
+                self.parent.add_supported_stream("STREAM_OMAP_FROM_SRC", debug.DBIDbgHeader.snOmapFromSrc, PDBOmapStream)
+            if debug.DBIDbgHeader.snFPO != -1:
+                self.parent.add_supported_stream("STREAM_FPO", debug.DBIDbgHeader.snFPO, PDBFPOStream)
+            if debug.DBIDbgHeader.snNewFPO!= -1:
+                self.parent.add_supported_stream("STREAM_FPO_NEW", debug.DBIDbgHeader.snNewFPO, PDBNewFPOStream)
+                self.parent.add_supported_stream("STREAM_FPO_STRINGS", debug.DBIDbgHeader.snNewFPO+1, PDBFPOStrings)
+
+class PDBFPOStrings(ParsedPDBStream):
+    def load(self):
+        import fpo
+        self.fpo_strings = fpo.FPO_STRING_DATA.parse(self.data)
+    def get_string(self, offset):
+        from construct import CString
+        return CString("x").parse(self.fpo_strings.StringData.Data[offset:])
+
+class PDBFPOStream(ParsedPDBStream):
+    def load(self):
+        import fpo
+        self.fpo = fpo.FPO_DATA_LIST.parse(self.data)
+
+class PDBNewFPOStream(ParsedPDBStream):
+    def load(self):
+        import fpo
+        self.fpo = fpo.FPO_DATA_LIST_V2.parse(self.data)
+    def load2(self):
+        if self.parent:
+            for f in self.fpo:
+                f.ProgramString = self.parent.STREAM_FPO_STRINGS.get_string(f.ProgramStringOffset)
+
+class PDBOmapStream(ParsedPDBStream):
+    def load(self):
+        import omap
+        self.omap_data = omap.Omap(self.data)
+    def remap(self, addr):
+        return self.omap_data.remap(addr)
+
+class PDBSectionStream(ParsedPDBStream):
+    def load(self):
+        import pe
+        self.sections = pe.Sections.parse(self.data)
+
+class PDBGlobalSymbolStream(ParsedPDBStream):
     def load(self):
         import gdata
         self.globals = gdata.parse_stream(self.stream_file)
@@ -251,10 +288,21 @@ class PDBGlobalSymbolStream(PDBStream):
             elif g.symtype == 2:
                 self.funcs[g.name] = g
 
+# Symbolic names for streams
+_stream_names7 = {
+    "STREAM_TPI": PDB_STREAM_TPI,
+    "STREAM_PDB": PDB_STREAM_PDB,
+    "STREAM_DBI": PDB_STREAM_DBI,
+}
+
+_stream_names2 = {
+    "STREAM_TPI": PDB_STREAM_TPI,
+    "STREAM_PDB": PDB_STREAM_PDB,
+    "STREAM_DBI": PDB_STREAM_DBI,
+}
+
 # Class mappings for the stream types
 _stream_types7 = {
-# Removing this: it's redundant and causing problems
-#    PDB_STREAM_ROOT: PDB7RootStream,
     PDB_STREAM_TPI: PDBTypeStream,
     PDB_STREAM_PDB: PDBInfoStream,
     PDB_STREAM_DBI: PDBDebugStream,
@@ -293,6 +341,14 @@ class PDB:
         else:
             return s[:size]
 
+    def add_supported_stream(self, name, index, cls):
+        self._stream_map[index] = cls
+        self._stream_names[name] = index
+
+    def _update_names(self):
+        for k,v in self._stream_names.items():
+            setattr(self,k,self.streams[v])
+
     def read_root(self, rs):
         self.streams = []
         for i in range(len(rs.streams)):
@@ -303,7 +359,17 @@ class PDB:
             stream_size, stream_pages = rs.streams[i]
             self.streams.append(
                 pdb_cls(self.fp, stream_pages, i, size=stream_size,
-                    page_size=self.page_size, fast_load=self.fast_load))
+                    page_size=self.page_size, fast_load=self.fast_load,
+                    parent=self))
+
+        # Sets up access to streams by name
+        self._update_names()
+        
+        # Second stage init. Currently only used for FPO strings
+        if not self.fast_load:
+            for s in self.streams:
+                if hasattr(s, 'load2'):
+                    s.load2()
 
 class PDB7(PDB):
     """Class representing a Microsoft PDB file, version 7.
@@ -323,6 +389,7 @@ class PDB7(PDB):
             raise ValueError("Invalid signature for PDB version 7")
         
         self._stream_map = _stream_types7
+        self._stream_names = _stream_names7 
 
         # Read in the root stream
         num_root_pages = _pages(root_size, self.page_size)
@@ -338,13 +405,6 @@ class PDB7(PDB):
 
         self.read_root(self.root_stream)
 
-        # Load global symbols, if present
-        if not fast_load and self.streams[PDB_STREAM_DBI].gsym_file:
-            gsf = self.streams[PDB_STREAM_DBI].gsym_file
-            self.streams[gsf] = PDBGlobalSymbolStream(self.fp, self.streams[gsf].pages,
-                gsf, size=self.streams[gsf].size, page_size=self.page_size,
-                fast_load=self.fast_load)
-
 class PDB2(PDB):
     def __init__(self, fp, fast_load=False):
         PDB.__init__(self, fp, fast_load)
@@ -356,6 +416,7 @@ class PDB2(PDB):
             raise ValueError("Invalid signature for PDB version 2")
         
         self._stream_map = _stream_types2
+        self._stream_names = _stream_names2
 
         # Read in the root stream
         num_root_pages = _pages(root_size, self.page_size)
@@ -368,13 +429,6 @@ class PDB2(PDB):
             index=PDB_STREAM_ROOT, page_size=self.page_size)
 
         self.read_root(self.root_stream)
-
-        # Load global symbols, if present
-#        if not fast_load and self.streams[PDB_STREAM_DBI].gsym_file:
-#            gsf = self.streams[PDB_STREAM_DBI].gsym_file
-#            self.streams[gsf] = PDBGlobalSymbolStream(self.fp, self.streams[gsf].pages,
-#                gsf, size=self.streams[gsf].size, page_size=self.page_size,
-#                fast_load=self.fast_load)
 
 def parse(filename, fast_load=False):
     "Open a PDB file and autodetect its version"
