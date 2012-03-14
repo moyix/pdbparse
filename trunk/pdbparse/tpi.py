@@ -938,7 +938,7 @@ def merge_subcon(parent, subattr):
     """
 
     subcon = getattr(parent, subattr)
-    for a in (k for k in subcon.__attrs__ if not k.startswith("_")):
+    for a in (k for k in dir(subcon) if not k.startswith("_")):
         setattr(parent, a, getattr(subcon, a))
 
     delattr(parent, subattr)
