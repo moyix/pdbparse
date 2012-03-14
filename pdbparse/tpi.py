@@ -859,7 +859,9 @@ lfVTShape = Struct("lfVTShape",
     BitStruct("vt_descriptors",
         Array(lambda ctx: ctx._.count,
             BitField("vt_descriptors", 4)
-        )
+        ),
+        # Needed to align to a byte boundary
+        Padding(lambda ctx: (ctx._.count % 2) * 4),
     )
 )
 
