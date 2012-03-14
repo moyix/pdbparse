@@ -4,79 +4,82 @@ import sys, os
 import pdbparse
 from operator import itemgetter,attrgetter
 from bisect import bisect_right
-from struct import unpack
-from pdbparse.pe import Sections
-from pdbparse.omap import Omap
 from pdbparse.undecorate import undecorate
 
-try:
-    from IPython.Shell import IPShellEmbedxxx
-    ipy = True
-except ImportError:
-    import code
-    ipy = False
+class Lookup(object):
+    def __init__(self, mods):
+        self.addrs = {}
 
-if len(sys.argv) < 4 or len(sys.argv[1:]) % 3 != 0:
-    print >> sys.stderr, "usage: %s <pdb> <base> <omap> [[<pdb> <base> <omap>] ...]" % sys.argv[0]
-    sys.exit(1)
+        for pdbname,basestr in mods:
+            pdbbase = os.path.basename(pdbname).split('.')[0]
+            print "Loading symbols for %s..." % pdbbase
+            pdb = pdbparse.parse(pdbname)
+            base = int(basestr,0)
+            sects = pdb.STREAM_SECT_HDR_ORIG.sections
+            gsyms = pdb.STREAM_GSYM
+            omap = pdb.STREAM_OMAP_FROM_SRC
 
-mods = [ (sys.argv[i],sys.argv[i+1],int(sys.argv[i+2])) for i in range(1,len(sys.argv)-2,3) ]
+            last_sect = max(sects, key=attrgetter('VirtualAddress'))
+            limit = base + last_sect.VirtualAddress + last_sect.Misc.VirtualSize
 
-addrs = {}
+            self.addrs[base,limit] = {}
+            self.addrs[base,limit]['name'] = pdbbase
+            self.addrs[base,limit]['addrs'] = []
+            for sym in gsyms.globals:
+                off = sym.offset
+                try:
+                    virt_base = sects[sym.segment-1].VirtualAddress
+                except IndexError:
+                    continue
 
-# Set this to the first PDB section that contains section headers
-# Common bases:
-#   ntdll: 8
-#   ntoskrnl: 10
-# BASE = 
+                mapped = omap.remap(off+virt_base) + base
+                self.addrs[base,limit]['addrs'].append((mapped,sym.name))
 
-for pdbname,basestr,BASE in mods:
-    pdbbase = os.path.basename(pdbname).split('.')[0]
-    print "Loading symbols for %s..." % pdbbase
-    pdb = pdbparse.parse(pdbname)
-    base = int(basestr,0)
-    sects = Sections.parse(pdb.streams[BASE].data)
-    orig_sects = Sections.parse(pdb.streams[BASE+3].data)
-    gsyms = pdb.streams[pdb.streams[3].gsym_file]
-    omap = Omap(pdb.streams[BASE+2].data)
-    omap_rev = Omap(pdb.streams[BASE+1].data)
+            self.addrs[base,limit]['addrs'].sort(key=itemgetter(0))
 
-    last_sect = max(sects, key=attrgetter('VirtualAddress'))
-    limit = base + last_sect.VirtualAddress + last_sect.Misc.VirtualSize
+        self.locs = {}
+        self.names = {}
+        for base,limit in self.addrs:
+            mod = self.addrs[base,limit]['name']
+            symbols = self.addrs[base,limit]['addrs']
+            self.locs[base,limit]  = [a[0] for a in symbols]
+            self.names[base,limit] = [a[1] for a in symbols]
 
-    addrs[base,limit] = {}
-    addrs[base,limit]['name'] = pdbbase
-    addrs[base,limit]['addrs'] = []
-    for sym in gsyms.globals:
-        off = sym.offset
-        try:
-            virt_base = sects[sym.segment-1].VirtualAddress
-        except IndexError:
-            continue
+    def lookup(self, loc):
+        for base,limit in self.addrs:
+            if loc in xrange(base,limit):
+                mod = self.addrs[base,limit]['name']
+                symbols = self.addrs[base,limit]['addrs']
+                locs  = self.locs[base,limit]
+                names = self.names[base,limit] 
+                idx = bisect_right(locs, loc) - 1
+                diff = loc - locs[idx]
+                if diff:
+                    return "%s!%s+%#x" % (mod,names[idx],diff)
+                else:
+                    return "%s!%s" % (mod,names[idx])
+        return "unknown"
 
-        mapped = omap.remap(off+virt_base) + base
-        addrs[base,limit]['addrs'].append((mapped,sym.name))
+if __name__ == "__main__":
+    try:
+        from IPython.frontend.terminal.embed import InteractiveShellEmbed
+        ipy = True
+    except ImportError:
+        import code
+        ipy = False
 
-    addrs[base,limit]['addrs'].sort(key=itemgetter(0))
+    if len(sys.argv) < 3 or len(sys.argv[1:]) % 2 != 0:
+        print >> sys.stderr, "usage: %s <pdb> <base> [[<pdb> <base>] ...]" % sys.argv[0]
+        sys.exit(1)
 
-def lookup(loc):
-    for base,limit in addrs:
-        if loc in xrange(base,limit):
-            mod = addrs[base,limit]['name']
-            symbols = addrs[base,limit]['addrs']
-            locs  = [a[0] for a in symbols]
-            names = [a[1] for a in symbols]
-            idx = bisect_right(locs, loc) - 1
-            diff = loc - locs[idx]
-            if diff:
-                return "%s!%s+%#x" % (mod,names[idx],diff)
-            else:
-                return "%s!%s" % (mod,names[idx])
-    return "unknown"
+    mods = [ (sys.argv[i],sys.argv[i+1]) for i in range(1,len(sys.argv)-1,2) ]
 
-banner = "Use lookup(addr) to resolve an address to its nearest symbol"
-if ipy:
-    ipshell = IPShellEmbed([], banner=banner)
-    ipshell()
-else:
-    code.interact(banner=banner, local=locals())
+    lobj = Lookup(mods)
+    lookup = lobj.lookup
+    
+    banner = "Use lookup(addr) to resolve an address to its nearest symbol"
+    if ipy:
+        shell = InteractiveShellEmbed(banner2=banner)
+        shell()
+    else:
+        code.interact(banner=banner, local=locals())
