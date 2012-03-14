@@ -20,7 +20,7 @@ This stream gives the offsets and (in private symbols) types of all global symbo
 
 =OMAP Streams=
 
-OMAP data is used for translating addresses between one object layout and another. The MSDN article on the topic explains the exact procedure for this. If an executable has been rearranged for some reason, there will generally be two OMAP streams present: OMAP_FROM_SRC, which translates from the original addresses to the final module, and OMAP_TO_SRC, which does the reverse.
+OMAP data is used for translating addresses between one object layout and another. The [http://msdn.microsoft.com/en-us/library/windows/desktop/bb870605(v=vs.85).aspx MSDN article on the topic] explains the exact procedure for this. If an executable has been rearranged for some reason, there will generally be two OMAP streams present: OMAP_FROM_SRC, which translates from the original addresses to the final module, and OMAP_TO_SRC, which does the reverse.
 
 =Section Header Streams=
 
