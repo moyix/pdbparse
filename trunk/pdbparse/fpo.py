@@ -6,14 +6,14 @@ FPO_DATA = Struct("FPO_DATA",
     ULInt32("cbProcSize"),          # number of bytes in function
     ULInt32("cdwLocals"),           # number of bytes in locals/4
     ULInt16("cdwParams"),           # number of bytes in params/4
-    BitStruct("BitValues",
+    Embed(BitStruct("BitValues",
         Octet("cbProlog"),          # number of bytes in prolog
         BitField("cbFrame",2),      # frame type
         Bit("reserved"),            # reserved for future use
         Flag("fUseBP"),             # TRUE if EBP has been allocated
         Flag("fHasSEH"),            # TRUE if SEH in func
         BitField("cbRegs",3),       # number of regs saved
-    ),
+    )),
 )
 
 # New style FPO records with program strings
@@ -22,11 +22,15 @@ FPO_DATA_V2 = Struct("FPO_DATA_V2",
     ULInt32("cbProcSize"),
     ULInt32("cbLocals"),
     ULInt32("cbParams"),
-    ULInt32("Unk1"),        # always 0
+    ULInt32("maxStack"),        # so far only observed to be 0
     ULInt32("ProgramStringOffset"),
     ULInt16("cbProlog"),
     ULInt16("cbSavedRegs"),
-    ULInt32("Unk2"),        # some kind of flags. 0,1,4,5
+    FlagsEnum(ULInt32("flags"),
+        SEH = 1,
+        CPPEH = 2,              # conjectured
+        fnStart = 4,
+    ),
 )
 
 # Ranges for both types
