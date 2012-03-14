@@ -78,10 +78,6 @@ DbiDbgHeader = Struct("DbiDbgHeader",
     SLInt16("snSectionHdrOrig"),
 )
 
-DBI = Debugger(Struct("DBI",
-    DBIHeader,
-))
-
 def parse_stream(stream):
     pos = 0
     dbihdr = DBIHeader.parse_stream(stream)
