@@ -398,8 +398,8 @@ class PDB7(PDB):
         if self.signature != _PDB7_SIGNATURE:
             raise ValueError("Invalid signature for PDB version 7")
         
-        self._stream_map = _stream_types7
-        self._stream_names = _stream_names7 
+        self._stream_map = dict(_stream_types7)
+        self._stream_names = dict(_stream_names7)
 
         # Read in the root stream
         num_root_pages = _pages(root_size, self.page_size)
@@ -425,8 +425,8 @@ class PDB2(PDB):
         if self.signature != _PDB2_SIGNATURE:
             raise ValueError("Invalid signature for PDB version 2")
         
-        self._stream_map = _stream_types2
-        self._stream_names = _stream_names2
+        self._stream_map = dict(_stream_types2)
+        self._stream_names = dict(_stream_names2)
 
         # Read in the root stream
         num_root_pages = _pages(root_size, self.page_size)
