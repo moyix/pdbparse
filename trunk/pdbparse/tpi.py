@@ -13,7 +13,7 @@ type_refs = {
     "LF_CLASS": ["fieldlist", "derived", "vshape"],
     "LF_ENUM": ["utype", "fieldlist"],
     "LF_FIELDLIST": [],
-    "LF_MFUNC": ["return_type", "class_type", "this_type", "arglist"],
+    "LF_MFUNCTION": ["return_type", "class_type", "this_type", "arglist"],
     "LF_MODIFIER": ["modified_type"],
     "LF_POINTER": ["utype"],
     "LF_PROCEDURE": ["return_type", "arglist"],
@@ -22,6 +22,9 @@ type_refs = {
     "LF_UNION": ["fieldlist"],
     "LF_UNION_ST": ["fieldlist"],
     "LF_VTSHAPE": [],
+
+    # TODO: Unparsed
+    "LF_METHODLIST": [],
 
     # FIELDLIST substructures
     "LF_BCLASS": ["index"],
@@ -691,7 +694,7 @@ subStruct = Struct("substructs",
 )
 
 lfFieldList = Struct("lfFieldList",
-    GreedyRange(subStruct)
+    OptionalGreedyRange(subStruct)
 )
 
 lfEnum = Struct("lfEnum",
@@ -862,7 +865,9 @@ lfVTShape = Struct("lfVTShape",
         ),
         # Needed to align to a byte boundary
         Padding(lambda ctx: (ctx._.count % 2) * 4),
-    )
+    ),
+    Peek(ULInt8("_pad")),
+    PadAlign,
 )
 
 Type = Debugger(Struct("type",
@@ -876,7 +881,7 @@ Type = Debugger(Struct("type",
             "LF_CLASS": lfClass,
             "LF_ENUM": lfEnum,
             "LF_FIELDLIST": lfFieldList,
-            "LF_MFUNC": lfMFunc,
+            "LF_MFUNCTION": lfMFunc,
             "LF_MODIFIER": lfModifier,
             "LF_POINTER": lfPointer,
             "LF_PROCEDURE": lfProcedure,
@@ -890,7 +895,7 @@ Type = Debugger(Struct("type",
     ),
 ))
 
-Type = Struct("types",
+Types = Struct("types",
     ULInt16("length"),
     Tunnel(
         String("type_data", lambda ctx: ctx.length),
@@ -927,7 +932,7 @@ Header = Struct("TPIHeader",
 ### Stream as a whole
 TPIStream = Struct("TPIStream",
     Header,
-    Array(lambda ctx: ctx.TPIHeader.ti_max - ctx.TPIHeader.ti_min, Type),
+    Array(lambda ctx: ctx.TPIHeader.ti_max - ctx.TPIHeader.ti_min, Types),
 )
 
 ### END PURE CONSTRUCT DATA ###
