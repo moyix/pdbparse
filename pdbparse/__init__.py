@@ -237,7 +237,16 @@ class PDBDebugStream(ParsedPDBStream):
                 self.parent.add_supported_stream("STREAM_FPO", debug.DBIDbgHeader.snFPO, PDBFPOStream)
             if debug.DBIDbgHeader.snNewFPO!= -1:
                 self.parent.add_supported_stream("STREAM_FPO_NEW", debug.DBIDbgHeader.snNewFPO, PDBNewFPOStream)
-                self.parent.add_supported_stream("STREAM_FPO_STRINGS", debug.DBIDbgHeader.snNewFPO+1, PDBFPOStrings)
+                #self.parent.add_supported_stream("STREAM_FPO_STRINGS", debug.DBIDbgHeader.snNewFPO+1, PDBFPOStrings)
+            
+            # Currently unparsed, but we know their names
+            if debug.DBIDbgHeader.snXdata != -1:
+                self.parent.add_supported_stream("STREAM_XDATA", debug.DBIDbgHeader.snXdata, PDBStream)
+            if debug.DBIDbgHeader.snPdata != -1:
+                self.parent.add_supported_stream("STREAM_PDATA", debug.DBIDbgHeader.snPdata, PDBStream)
+            if debug.DBIDbgHeader.snTokenRidMap != -1:
+                self.parent.add_supported_stream("STREAM_TOKEN_RID_MAP", debug.DBIDbgHeader.snTokenRidMap, PDBStream)
+            
 
 class PDBFPOStrings(ParsedPDBStream):
     def load(self):
@@ -258,6 +267,7 @@ class PDBNewFPOStream(ParsedPDBStream):
         self.fpo = fpo.FPO_DATA_LIST_V2.parse(self.data)
     def load2(self):
         if self.parent:
+            if not hasattr(self.parent, "STREAM_FPO_STRINGS"): return
             for f in self.fpo:
                 f.ProgramString = self.parent.STREAM_FPO_STRINGS.get_string(f.ProgramStringOffset)
 
