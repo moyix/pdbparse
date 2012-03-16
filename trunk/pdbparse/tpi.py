@@ -937,6 +937,7 @@ TPIStream = Struct("TPIStream",
 
 ### END PURE CONSTRUCT DATA ###
 
+# FIXME: this should not be necessary if we use the Embed construct
 def merge_subcon(parent, subattr):
     """Merge a subcon's fields into its parent.
 
@@ -945,7 +946,9 @@ def merge_subcon(parent, subattr):
     """
 
     subcon = getattr(parent, subattr)
-    for a in (k for k in dir(subcon) if not k.startswith("_")):
+    if not subcon: return
+
+    for a in subcon:
         setattr(parent, a, getattr(subcon, a))
 
     delattr(parent, subattr)

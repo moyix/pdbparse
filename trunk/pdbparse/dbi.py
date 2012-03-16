@@ -40,6 +40,7 @@ DBIHeader = Struct("DBIHeader",
     ULInt32("ecinfoSize"),                                                  # 52
     ULInt16("flags"),                                                       # 56
     Enum(ULInt16("Machine"),                                                # 58
+        IMAGE_FILE_MACHINE_UNKNOWN = 0x0,
         IMAGE_FILE_MACHINE_I386 = 0x014c,
         IMAGE_FILE_MACHINE_IA64 = 0x0200,
         IMAGE_FILE_MACHINE_AMD64 = 0x8664,

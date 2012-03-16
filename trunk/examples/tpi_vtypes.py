@@ -8,7 +8,9 @@ vtype  = {
     "T_32PINT4": "'pointer', ['long']",
     "T_32PRCHAR": "'pointer', ['unsigned char']",
     "T_32PUCHAR": "'pointer', ['unsigned char']",
+    "T_32PWCHAR": "'pointer', ['wchar']",
     "T_32PULONG": "'pointer', ['unsigned long']",
+    "T_32PUINT4": "'pointer', ['unsigned int']",
     "T_32PLONG": "'pointer', ['long']",
     "T_32PUQUAD": "'pointer', ['unsigned long long']",
     "T_32PUSHORT": "'pointer', ['unsigned short']",
@@ -35,13 +37,17 @@ vtype  = {
     "T_UQUAD": "'unsigned long long'",
     "T_USHORT": "'unsigned short'",
     "T_WCHAR": "'wchar'",
+    "T_CHAR": "'char'",
     "T_VOID": "'void'",
+    "T_BOOL08": "'unsigned char'",
 }
 base_type_size = {
     "T_32PRCHAR": 4,
     "T_32PUCHAR": 4,
+    "T_32PWCHAR": 4,
     "T_32PLONG": 4,
     "T_32PULONG": 4,
+    "T_32PUINT4": 4,
     "T_32PUQUAD": 4,
     "T_32PUSHORT": 4,
     "T_32PVOID": 4,
@@ -67,6 +73,7 @@ base_type_size = {
     "T_UQUAD": 8,
     "T_USHORT": 2,
     "T_WCHAR": 2,
+    "T_BOOL08": 1,
 }
 def get_size(lf):
     if isinstance(lf,str):
@@ -117,7 +124,10 @@ def member_str(m):
 def print_vtype(lf):
     print "  '%s' : [ %#x, {" % (lf.name, lf.size)
     for s in lf.fieldlist.substructs:
-        print "    '%s' : [ %#x, %s]," % (s.name, s.offset, member_str(s.index))
+        try:
+            print "    '%s' : [ %#x, %s]," % (s.name, s.offset, member_str(s.index))
+        except AttributeError,e:
+            print "    # Missing member of type %s" % s.leaf_type
     print "} ],"
 
 
@@ -141,7 +151,9 @@ types = args[1:]
 
 if not opts.arch_ptr_size:
     dbg = pdb.STREAM_DBI
-    if dbg.machine == 'IMAGE_FILE_MACHINE_AMD64':
+    if dbg.machine == 'IMAGE_FILE_MACHINE_UNKNOWN':
+        op.error("Image type cannot be determined, please specify an architecture pointer size (using -a)")
+    elif dbg.machine == 'IMAGE_FILE_MACHINE_AMD64':
         ARCH_PTR_SIZE = 8
     elif dbg.machine == 'IMAGE_FILE_MACHINE_IA64':
         ARCH_PTR_SIZE = 8
