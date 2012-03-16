@@ -128,6 +128,10 @@ class PDB7RootStream(PDBStream):
         sizes = []
         for i in range(0,self.num_streams*4,4):
             (stream_size,) = unpack("<L",rs[i:i+4])
+            # Seen in some recent symbols. Not sure what the difference between this
+            # and stream_size == 0 is.
+            if stream_size == 0xffffffff:
+                stream_size = 0
             sizes.append(stream_size)
         
         # Next comes a list of the pages that make up each stream

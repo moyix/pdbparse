@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='pdbparse',
-      version='1.0',
+      version='1.1',
       description='Python parser for Microsoft PDB files',
       author='Brendan Dolan-Gavitt',
       author_email='brendandg@gatech.edu',
