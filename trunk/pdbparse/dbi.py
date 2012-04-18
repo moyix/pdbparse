@@ -108,20 +108,6 @@ def parse_stream(stream):
     # The data we really want
     dbghdr = DbiDbgHeader.parse_stream(stream)
     
-#      bits.Position += dh.secconSize;
-#
-#      // Skip the Section Map substream.
-#      bits.Position += dh.secmapSize;
-#
-#      // Skip the File Info substream.
-#      bits.Position += dh.filinfSize;
-#
-#      // Skip the TSM substream.
-#      bits.Position += dh.tsmapSize;
-#
-#      // Skip the EC substream.
-#      bits.Position += dh.ecinfoSize;
-
     return Container(DBIHeader=dbihdr,
                      DBIExHeaders=ListContainer(dbiexhdrs),
                      DBIDbgHeader=dbghdr)

@@ -84,6 +84,7 @@ class PDBStream:
     """
     def _get_data(self):
         pos = self.stream_file.tell()
+        self.stream_file.seek(0)
         data = self.stream_file.read()
         self.stream_file.seek(pos)
         return data
