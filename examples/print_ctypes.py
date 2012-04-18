@@ -293,9 +293,11 @@ def memb_str(memb, name, off=-1, indent=""):
     else:
         return "%s" % tpname
 
-def unionize(member_list):
+def unionize(lf, member_list):
     new_mlist = []
+    in_union = (lf.leaf_type == "LF_UNION")
     i = 0
+    
     while i < len(member_list):
         off,s = member_list[i]
         if i+1 < len(member_list):
@@ -312,7 +314,25 @@ def unionize(member_list):
                     else:
                         break
                 new_mlist.append(union)
-            else: 
+            elif in_union: # off != next_off
+                # handle an anonymous structs within a union
+                struct = []
+                if off < next_off:
+                    this_struct = "struct {\n" + "   " + s + "\n"
+                    while off < next_off:
+                        i += 1
+                        off, s = member_list[i]
+                        this_struct += "   " + s + "\n"
+                        if i+1 < len(member_list):
+                            next_off, _ = member_list[i+1]
+                        else:
+                            break
+                    this_struct += "};\n"
+                    struct.append(this_struct)
+                else:
+                    struct.append(s)
+                new_mlist.append(struct)
+            else:
                 new_mlist.append(s)
         else: 
             new_mlist.append(s)
@@ -322,14 +342,12 @@ def unionize(member_list):
 def flstr(lf, indent=""):
     flstr = ""
     memb_strs = [ memb_str(s.index,s.name,s.offset,indent) for s in lf.fieldlist.substructs if s.leaf_type == "LF_MEMBER" ]
-    for m in unionize(memb_strs):
+    for m in unionize(lf, memb_strs):
         if isinstance(m,list):
-            flstr += indent + "union {\n"
             for um in m:
                 um = um.splitlines()
                 for u in um:
                     flstr += indent + u + "\n"
-            flstr += indent + "};\n"
         else:
             flstr += indent + m + "\n"
     enum_membs = [ e for e in lf.fieldlist.substructs if e.leaf_type == "LF_ENUMERATE" ]
