@@ -141,7 +141,13 @@ def handle_pe(pe_file):
     dbgdata, tp = get_pe_debug_data(pe_file)
     if tp == "IMAGE_DEBUG_TYPE_CODEVIEW":
         # XP+
-        (guid,filename) = get_rsds(dbgdata)
+        if dbgdata[:4] == "RSDS":
+            (guid,filename) = get_rsds(dbgdata)
+        elif dbgdata[:4] == "NB10":
+            (guid,filename) = get_nb10(dbgdata)
+        else:
+            print "ERR: CodeView section not NB10 or RSDS"
+            return
         guid = guid.upper()
         saved_file = download_file(guid,filename)
     elif tp == "IMAGE_DEBUG_TYPE_MISC":
