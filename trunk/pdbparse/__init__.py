@@ -324,7 +324,6 @@ _stream_types7 = {
 }
 
 _stream_types2 = {
-    PDB_STREAM_ROOT: PDB2RootStream,
     PDB_STREAM_TPI: PDBTypeStream,
     #PDB_STREAM_PDB: PDBInfoStream,
     PDB_STREAM_DBI: PDBDebugStream,
