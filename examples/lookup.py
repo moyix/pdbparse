@@ -6,18 +6,42 @@ from operator import itemgetter,attrgetter
 from bisect import bisect_right
 from pdbparse.undecorate import undecorate
 
+class DummyOmap(object):
+    def remap(self, addr):
+        return addr
+
 class Lookup(object):
     def __init__(self, mods):
         self.addrs = {}
+        self._cache = {}
+
+        not_found = []
 
         for pdbname,basestr in mods:
-            pdbbase = os.path.basename(pdbname).split('.')[0]
-            print "Loading symbols for %s..." % pdbbase
-            pdb = pdbparse.parse(pdbname)
             base = int(basestr,0)
-            sects = pdb.STREAM_SECT_HDR_ORIG.sections
+            pdbbase = ".".join(os.path.basename(pdbname).split('.')[:-1])
+            if not os.path.exists(pdbname):
+                print "WARN: %s not found" % pdbname
+                not_found.append( (base, pdbbase) )
+                continue
+
+            print "Loading symbols for %s..." % pdbbase
+            try:
+                pdb = pdbparse.parse(pdbname)
+            except:
+                print "WARN: error parsing %s, skipping" % pdbbase
+                not_found.append( (base, pdbbase) )
+                continue
+
+            try:
+                sects = pdb.STREAM_SECT_HDR_ORIG.sections
+                omap = pdb.STREAM_OMAP_FROM_SRC
+            except AttributeError as e:
+                # In this case there is no OMAP, so we use the given section
+                # headers and use the identity function for omap.remap
+                sects = pdb.STREAM_SECT_HDR.sections
+                omap = DummyOmap()
             gsyms = pdb.STREAM_GSYM
-            omap = pdb.STREAM_OMAP_FROM_SRC
 
             last_sect = max(sects, key=attrgetter('VirtualAddress'))
             limit = base + last_sect.VirtualAddress + last_sect.Misc.VirtualSize
@@ -46,6 +70,9 @@ class Lookup(object):
             self.names[base,limit] = [a[1] for a in symbols]
 
     def lookup(self, loc):
+        if loc in self._cache:
+            return self._cache[loc]
+
         for base,limit in self.addrs:
             if loc in xrange(base,limit):
                 mod = self.addrs[base,limit]['name']
@@ -55,9 +82,11 @@ class Lookup(object):
                 idx = bisect_right(locs, loc) - 1
                 diff = loc - locs[idx]
                 if diff:
-                    return "%s!%s+%#x" % (mod,names[idx],diff)
+                    ret = "%s!%s+%#x" % (mod,names[idx],diff)
                 else:
-                    return "%s!%s" % (mod,names[idx])
+                    ret = "%s!%s" % (mod,names[idx])
+                self._cache[loc] = ret
+                return ret
         return "unknown"
 
 if __name__ == "__main__":

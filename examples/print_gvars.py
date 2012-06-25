@@ -7,13 +7,14 @@ from optparse import OptionParser
 from pdbparse.pe import Sections
 from pdbparse.omap import Omap
 
+class DummyOmap(object):
+    def remap(self, addr):
+        return addr
+
 def cstring(str):
     return str.split('\0')[0]
 
 parser = OptionParser()
-parser.add_option("-n", "--no-omap",
-                  action="store_false", dest="omap", default=True,
-                  help="don't try to make use of OMAP information")
 (opts, args) = parser.parse_args()
 
 if len(args) != 2:
@@ -21,15 +22,17 @@ if len(args) != 2:
 
 pdb = pdbparse.parse(args[0])
 imgbase = int(args[1], 0)
-sects = pdb.STREAM_SECT_HDR_ORIG.sections
+try:
+    sects = pdb.STREAM_SECT_HDR_ORIG.sections
+    omap = pdb.STREAM_OMAP_FROM_SRC
+except AttributeError as e:
+    # In this case there is no OMAP, so we use the given section
+    # headers and use the identity function for omap.remap
+    sects = pdb.STREAM_SECT_HDR.sections
+    omap = DummyOmap()
+
 gsyms = pdb.STREAM_GSYM
 
-if opts.omap:
-    omap = pdb.STREAM_OMAP_FROM_SRC
-else:
-    class Dummy: pass
-    omap = Dummy()
-    omap.remap = lambda x: x
 
 for sym in gsyms.globals:
     try:
