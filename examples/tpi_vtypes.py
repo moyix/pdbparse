@@ -9,10 +9,12 @@ vtype  = {
     "T_32PRCHAR": "'pointer', ['unsigned char']",
     "T_32PUCHAR": "'pointer', ['unsigned char']",
     "T_32PWCHAR": "'pointer', ['wchar']",
+    "T_32PSHORT": "'pointer', ['short']",
     "T_32PULONG": "'pointer', ['unsigned long']",
     "T_32PUINT4": "'pointer', ['unsigned int']",
     "T_32PLONG": "'pointer', ['long']",
     "T_32PUQUAD": "'pointer', ['unsigned long long']",
+    "T_32PQUAD": "'pointer', ['long long']",
     "T_32PUSHORT": "'pointer', ['unsigned short']",
     "T_32PVOID": "'pointer', ['void']",
     "T_64PRCHAR": "'pointer64', ['unsigned char']",
@@ -20,6 +22,7 @@ vtype  = {
     "T_64PULONG": "'pointer64', ['unsigned long']",
     "T_64PLONG": "'pointer64', ['long']",
     "T_64PUQUAD": "'pointer64', ['unsigned long long']",
+    "T_64PQUAD": "'pointer64', ['long long']",
     "T_64PUSHORT": "'pointer64', ['unsigned short']",
     "T_64PVOID": "'pointer64', ['void']",
     "T_INT4": "'long'",
@@ -40,6 +43,8 @@ vtype  = {
     "T_CHAR": "'char'",
     "T_VOID": "'void'",
     "T_BOOL08": "'unsigned char'",
+    "T_32PREAL32": "'pointer', ['void']",
+    "T_32PREAL64": "'pointer64', ['void']",
 }
 base_type_size = {
     "T_32PRCHAR": 4,
@@ -49,7 +54,9 @@ base_type_size = {
     "T_32PULONG": 4,
     "T_32PUINT4": 4,
     "T_32PUQUAD": 4,
+    "T_32PQUAD": 4,
     "T_32PUSHORT": 4,
+    "T_32PSHORT": 4,
     "T_32PVOID": 4,
     "T_64PRCHAR": 8,
     "T_64PUCHAR": 8,
@@ -74,6 +81,8 @@ base_type_size = {
     "T_USHORT": 2,
     "T_WCHAR": 2,
     "T_BOOL08": 1,
+    "T_32PREAL32": 4,
+    "T_32PREAL64": 8,
 }
 def get_size(lf):
     if isinstance(lf,str):
