@@ -5,6 +5,7 @@ import pdbparse
 from operator import itemgetter,attrgetter
 from bisect import bisect_right
 from pdbparse.undecorate import undecorate
+from itertools import islice, count
 
 class DummyOmap(object):
     def remap(self, addr):
@@ -28,8 +29,8 @@ class Lookup(object):
             print "Loading symbols for %s..." % pdbbase
             try:
                 pdb = pdbparse.parse(pdbname)
-            except:
-                print "WARN: error parsing %s, skipping" % pdbbase
+            except Exception, e:
+                print "WARN: error %s parsing %s, skipping" % (e,pdbbase)
                 not_found.append( (base, pdbbase) )
                 continue
 
@@ -50,6 +51,7 @@ class Lookup(object):
             self.addrs[base,limit]['name'] = pdbbase
             self.addrs[base,limit]['addrs'] = []
             for sym in gsyms.globals:
+                if not hasattr(sym, 'offset'): continue
                 off = sym.offset
                 try:
                     virt_base = sects[sym.segment-1].VirtualAddress
@@ -74,7 +76,7 @@ class Lookup(object):
             return self._cache[loc]
 
         for base,limit in self.addrs:
-            if loc in xrange(base,limit):
+            if loc >= base and loc < limit:
                 mod = self.addrs[base,limit]['name']
                 symbols = self.addrs[base,limit]['addrs']
                 locs  = self.locs[base,limit]

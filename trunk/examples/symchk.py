@@ -178,6 +178,9 @@ def handle_pe(pe_file):
         else:
             print "WARN: DBG file received from symbol server has unknown CodeView section"
             return
+    else:
+        print "Unknown type:",tp
+        return
 
     if saved_file.endswith("_"):
         os.system("cabextract %s" % saved_file)
