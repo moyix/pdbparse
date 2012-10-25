@@ -295,6 +295,7 @@ class PDBGlobalSymbolStream(ParsedPDBStream):
         self.vars = {}
         self.funcs = {}
         for g in self.globals:
+            if not hasattr(g, 'symtype'): continue
             if g.symtype == 0:
                 if g.name.startswith("_"):
                     self.vars[g.name[1:]] = g

@@ -42,3 +42,5 @@ for sym in gsyms.globals:
         print "%s,%#x,%d,%s" % (sym.name,imgbase+omap.remap(off+virt_base),sym.symtype,nm)
     except IndexError,e:
         print >> sys.stderr, "Skipping %s, segment %d does not exist" % (sym.name,sym.segment-1)
+    except AttributeError,e:
+        pass
