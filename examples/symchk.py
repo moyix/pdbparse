@@ -36,6 +36,8 @@ from shutil import copyfileobj
 from urllib import FancyURLopener
 from pdbparse.dbgold import CV_RSDS_HEADER, CV_NB10_HEADER, DebugDirectoryType
 
+#SYM_URL = 'http://symbols.mozilla.org/firefox'
+SYM_URL = 'http://msdl.microsoft.com/download/symbols'
 USER_AGENT = "Microsoft-Symbol-Server/6.6.0007.5"
 
 class PDBOpener(FancyURLopener):
@@ -86,7 +88,7 @@ def download_file(guid,fname,path="",quiet=False):
     if len(guid) == 32:
         print "Warning: GUID is too short to be valid. Did you append the Age field?"
 
-    url = "http://msdl.microsoft.com/download/symbols/%s/%s/" % (fname,guid)
+    url = SYM_URL + "/%s/%s/" % (fname,guid)
     opener = urllib2.build_opener()
     
     # Whatever extension the user has supplied it must be replaced with .pd_
@@ -194,6 +196,7 @@ def get_pe_from_pe(filename):
 
 
 def main():
+    global SYM_URL
     from optparse import OptionParser
 
     parser = OptionParser()
@@ -205,8 +208,13 @@ def main():
                       help='use GUID to download symbols [Note: requires -s]')
     parser.add_option('-s', '--symbols', dest='symfile', metavar='FILENAME',
                       help='use FILENAME to download symbols [Note: requires -g]')
+    parser.add_option('-u', '--url', dest='url', metavar='URL',
+                      help='use URL for symbol server')
 
     opts,args = parser.parse_args()
+
+    if opts.url:
+        SYM_URL = opts.url
 
     if opts.exe:
         handle_pe(opts.exe)
