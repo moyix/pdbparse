@@ -18,8 +18,7 @@ class Lookup(object):
 
         not_found = []
 
-        for pdbname,basestr in mods:
-            base = int(basestr,0)
+        for pdbname,base in mods:
             pdbbase = ".".join(os.path.basename(pdbname).split('.')[:-1])
             if not os.path.exists(pdbname):
                 print "WARN: %s not found" % pdbname
@@ -28,11 +27,27 @@ class Lookup(object):
 
             print "Loading symbols for %s..." % pdbbase
             try:
-                pdb = pdbparse.parse(pdbname)
-            except Exception, e:
-                print "WARN: error %s parsing %s, skipping" % (e,pdbbase)
-                not_found.append( (base, pdbbase) )
-                continue
+                # Do this the hard way to avoid having to load
+                # the types stream in mammoth PDB files
+                pdb = pdbparse.parse(pdbname, fast_load=True)
+                pdb.STREAM_DBI.load()
+                pdb._update_names()
+                pdb.STREAM_GSYM = pdb.STREAM_GSYM.reload()
+                pdb.STREAM_GSYM.load()
+                pdb.STREAM_SECT_HDR = pdb.STREAM_SECT_HDR.reload()
+                pdb.STREAM_SECT_HDR.load()
+                # These are the dicey ones
+                pdb.STREAM_OMAP_FROM_SRC = pdb.STREAM_OMAP_FROM_SRC.reload()
+                pdb.STREAM_OMAP_FROM_SRC.load()
+                pdb.STREAM_SECT_HDR_ORIG = pdb.STREAM_SECT_HDR_ORIG.reload()
+                pdb.STREAM_SECT_HDR_ORIG.load()
+
+            except AttributeError, e:
+                pass
+            #except Exception, e:
+            #    print "WARN: error %s parsing %s, skipping" % (e,pdbbase)
+            #    not_found.append( (base, pdbbase) )
+            #    continue
 
             try:
                 sects = pdb.STREAM_SECT_HDR_ORIG.sections
@@ -103,7 +118,7 @@ if __name__ == "__main__":
         print >> sys.stderr, "usage: %s <pdb> <base> [[<pdb> <base>] ...]" % sys.argv[0]
         sys.exit(1)
 
-    mods = [ (sys.argv[i],sys.argv[i+1]) for i in range(1,len(sys.argv)-1,2) ]
+    mods = [ (sys.argv[i],int(sys.argv[i+1],0)) for i in range(1,len(sys.argv)-1,2) ]
 
     lobj = Lookup(mods)
     lookup = lobj.lookup

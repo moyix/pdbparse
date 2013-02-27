@@ -91,13 +91,25 @@ class PDBStream:
     data = property(fget=_get_data)
 
     def __init__(self, fp, pages, index, size=-1, page_size=0x1000, fast_load=False, parent=None):
+        self.fp = fp
+        self.fast_load = fast_load
         self.parent = parent
         self.pages = pages
         self.index = index
         self.page_size = page_size
         if size == -1: self.size = len(pages)*page_size
         else: self.size = size
-        self.stream_file = StreamFile(fp, pages, size=size, page_size=page_size)
+        self.stream_file = StreamFile(self.fp, pages, size=size, page_size=page_size)
+
+    def reload(self):
+        """Convenience method. Reloads a PDBStream. May return a more specialized type."""
+        try:
+            pdb_cls = self.parent._stream_map[self.index]
+        except (KeyError,AttributeError):
+            pdb_cls = PDBStream
+        return pdb_cls(self.fp, self.pages, self.index, size=self.size,
+                page_size=self.page_size, fast_load=self.fast_load,
+                parent=self.parent)
 
 class ParsedPDBStream(PDBStream):
     def __init__(self, fp, pages, index=PDB_STREAM_PDB, size=-1,
