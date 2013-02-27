@@ -18,15 +18,13 @@ setup(name='pdbparse',
         Extension('pdbparse._undname', ['src/undname.c'], export_symbols=['undname'])
       ],
       scripts=[
-        'examples/get_syscall_table.py',
-        'examples/lookup.py',
-        'examples/pdbdump.py',
-        'examples/print_ctypes.py',
-        'examples/print_gvars.py',
-        'examples/print_tpi.py',
+        'examples/pdb_dump.py',
+        'examples/pdb_get_syscall_table.py',
+        'examples/pdb_lookup.py',
+        'examples/pdb_print_ctypes.py',
+        'examples/pdb_print_gvars.py',
+        'examples/pdb_print_tpi.py',
+        'examples/pdb_tpi_vtypes.py',
         'examples/symchk.py',
-        'examples/tpi_closure.py',
-        'examples/tpi_vtypes.py',
       ]
      )
-
