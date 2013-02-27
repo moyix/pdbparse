@@ -1012,7 +1012,9 @@ def resolve_typerefs(leaf, types, min):
             if ref < min:
                 setattr(leaf, attr, base_type._decode(ref,{}))
             elif ref >= min:
-                setattr(leaf, attr, types[ref])
+                try:
+                    setattr(leaf, attr, types[ref])
+                except KeyError: pass
     return leaf
 
 def merge_fwdrefs(leaf, types, map):
@@ -1027,7 +1029,7 @@ def merge_fwdrefs(leaf, types, map):
             setattr(leaf, attr, newrefs)
         elif not isinstance(ref,str):
             try: newref = types[map[ref.tpi_idx]]
-            except KeyError: newref = ref
+            except (KeyError, AttributeError): newref = ref
             setattr(leaf, attr, newref)
     return leaf
 
