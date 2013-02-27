@@ -34,10 +34,10 @@ import os.path
 from pefile import PE
 from shutil import copyfileobj
 from urllib import FancyURLopener
-from pdbparse.dbgold import CV_RSDS_HEADER, CV_NB10_HEADER, DebugDirectoryType
+from pdbparse.peinfo import *
 
 #SYM_URL = 'http://symbols.mozilla.org/firefox'
-SYM_URL = 'http://msdl.microsoft.com/download/symbols'
+SYM_URLS = ['http://msdl.microsoft.com/download/symbols']
 USER_AGENT = "Microsoft-Symbol-Server/6.6.0007.5"
 
 class PDBOpener(FancyURLopener):
@@ -47,21 +47,6 @@ class PDBOpener(FancyURLopener):
             raise urllib2.HTTPError(url, errcode, errmsg, headers, fp)
         else:
             FancyURLopener.http_error_default(url, fp, errcode, errmsg, headers)
-
-def get_pe_debug_data(filename):
-    try:
-        pe = PE(filename)
-    except IOError, e:
-        print e
-        sys.exit(-1)
-    dbgstruct = pe.DIRECTORY_ENTRY_DEBUG[0].struct
-    addr = dbgstruct.PointerToRawData
-    sz = dbgstruct.SizeOfData
-    f = open(filename)
-    f.seek(addr)
-    dbgdata = f.read(sz)
-    f.close()
-    return dbgdata, DebugDirectoryType._decode(dbgstruct.Type,{})
 
 lastprog = None
 def progress(blocks,blocksz,totalsz):
@@ -88,56 +73,27 @@ def download_file(guid,fname,path="",quiet=False):
     if len(guid) == 32:
         print "Warning: GUID is too short to be valid. Did you append the Age field?"
 
-    url = SYM_URL + "/%s/%s/" % (fname,guid)
-    opener = urllib2.build_opener()
-    
-    # Whatever extension the user has supplied it must be replaced with .pd_
-    tries = [ fname[:-1] + '_', fname ]
+    for sym_url in SYM_URLS:
+        url = sym_url + "/%s/%s/" % (fname,guid)
+        opener = urllib2.build_opener()
+        
+        # Whatever extension the user has supplied it must be replaced with .pd_
+        tries = [ fname[:-1] + '_', fname ]
 
-    for t in tries:
-        if not quiet: print "Trying %s" % (url+t)
-        outfile = os.path.join(path,t)
-        try:
-            hook = None if quiet else progress
-            PDBOpener().retrieve(url+t, outfile, reporthook=hook)
-            if not quiet:
-                print
-                print "Saved symbols to %s" % (outfile)
-            return outfile
-        except urllib2.HTTPError, e:
-            if not quiet:
-                print "HTTP error %u" % (e.code)
+        for t in tries:
+            if not quiet: print "Trying %s" % (url+t)
+            outfile = os.path.join(path,t)
+            try:
+                hook = None if quiet else progress
+                PDBOpener().retrieve(url+t, outfile, reporthook=hook)
+                if not quiet:
+                    print
+                    print "Saved symbols to %s" % (outfile)
+                return outfile
+            except urllib2.HTTPError, e:
+                if not quiet:
+                    print "HTTP error %u" % (e.code)
     return None
-
-
-def get_dbg_fname(dbgdata):
-    from pdbparse.dbgold import IMAGE_DEBUG_MISC
-    dbgstruct = IMAGE_DEBUG_MISC.parse(dbgdata)
-    
-    return dbgstruct.Strings[0].split('\\')[-1]
-
-def get_rsds(dbgdata):
-    dbg = CV_RSDS_HEADER.parse(dbgdata)
-    guidstr = "%08x%04x%04x%s%x" % (dbg.GUID.Data1, dbg.GUID.Data2, 
-                              dbg.GUID.Data3, dbg.GUID.Data4.encode('hex'),
-                              dbg.Age)
-    filename = dbg.Filename.split('\\')[-1]
-    return guidstr,filename
-
-def get_nb10(dbgdata):
-    dbg = CV_NB10_HEADER.parse(dbgdata)
-    guidstr = "%x%x" % (dbg.Timestamp, dbg.Age)
-    return guidstr,dbg.Filename
-
-def get_pe_guid(filename):
-    try:
-        pe = PE(filename)
-    except IOError, e:
-        print e
-        sys.exit(-1)
-    guidstr = "%x%x" % (pe.FILE_HEADER.TimeDateStamp,
-                        pe.OPTIONAL_HEADER.SizeOfImage)
-    return guidstr
 
 def handle_pe(pe_file):
     dbgdata, tp = get_pe_debug_data(pe_file)
@@ -194,9 +150,8 @@ def get_pe_from_pe(filename):
     if saved_file.endswith("_"):
         os.system("cabextract %s" % saved_file)
 
-
 def main():
-    global SYM_URL
+    global SYM_URLS
     from optparse import OptionParser
 
     parser = OptionParser()
@@ -209,12 +164,16 @@ def main():
     parser.add_option('-s', '--symbols', dest='symfile', metavar='FILENAME',
                       help='use FILENAME to download symbols [Note: requires -g]')
     parser.add_option('-u', '--url', dest='url', metavar='URL',
-                      help='use URL for symbol server')
+                      help=('use * separated URLs to search for symbols, e.g. ' +
+                            '"http://foo.com*http://bar.com". You may also set ' +
+                            'the SYMPATH environment variable'))
 
     opts,args = parser.parse_args()
 
     if opts.url:
-        SYM_URL = opts.url
+        SYM_URLS = opts.url.split('*')
+    elif os.getenv('SYMPATH'):
+        SYM_URLS = os.environ['SYMPATH'].split('*')
 
     if opts.exe:
         handle_pe(opts.exe)
@@ -231,7 +190,5 @@ def main():
     elif not (opts.exe or opts.guid or opts.symfile or opts.pe) and not args:
         parser.error("Must supply a PE file or specify by GUID")
 
-
 if __name__ == "__main__":
     main()
-
