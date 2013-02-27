@@ -1,4 +1,5 @@
 import pdbparse
+import os
 from operator import itemgetter,attrgetter
 from bisect import bisect_right
 from pdbparse.undecorate import undecorate
