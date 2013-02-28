@@ -14,7 +14,7 @@ _PDB2_FMT_SIZE = calcsize(_PDB2_FMT)
 
 _PDB7_SIGNATURE = 'Microsoft C/C++ MSF 7.00\r\n\x1ADS\0\0\0'
 _PDB7_SIGNATURE_LEN = len(_PDB7_SIGNATURE)
-_PDB7_FMT = "<%dsLLLLLL" % _PDB7_SIGNATURE_LEN
+_PDB7_FMT = "<%dsLLLLL" % _PDB7_SIGNATURE_LEN
 _PDB7_FMT_SIZE = calcsize(_PDB7_FMT)
 
 # Internal method to calculate the number of pages required
@@ -409,8 +409,7 @@ class PDB7(PDB):
     def __init__(self, fp, fast_load=False):
         PDB.__init__(self, fp, fast_load)
         (self.signature, self.page_size, alloc_table_ptr,
-         self.num_file_pages, root_size, reserved,
-         root_index) = unpack(_PDB7_FMT, self.fp.read(_PDB7_FMT_SIZE))
+         self.num_file_pages, root_size, reserved) = unpack(_PDB7_FMT, self.fp.read(_PDB7_FMT_SIZE))
         
         if self.signature != _PDB7_SIGNATURE:
             raise ValueError("Invalid signature for PDB version 7")
@@ -418,14 +417,26 @@ class PDB7(PDB):
         self._stream_map = dict(_stream_types7)
         self._stream_names = dict(_stream_names7)
 
-        # Read in the root stream
+        # How many pages in the root stream?
         num_root_pages = _pages(root_size, self.page_size)
+
+        # How many pages are needed to store the root page list?
+        num_root_index_pages = _pages(num_root_pages*4, self.page_size)
+        root_index_array_fmt = "<" + ("%dI" % num_root_index_pages)
+        root_index_pages = unpack(root_index_array_fmt,
+            self.fp.read(num_root_index_pages*4))
         
-        self.fp.seek(root_index * self.page_size)
-        page_list_fmt = "<" + ("%dL" % num_root_pages)
-        root_page_list = unpack(page_list_fmt,
-            self.fp.read(num_root_pages * 4))
-        root_stream_data = self.read(root_page_list, root_size)
+        # Read in the root page list
+        root_page_data = ""
+        for root_index in root_index_pages:
+            self.fp.seek(root_index * self.page_size)
+            root_page_data += self.fp.read(self.page_size)
+        
+        # Unpack
+        page_list_fmt = "<" + ("%dI" % num_root_pages)
+        root_page_list = unpack(page_list_fmt, root_page_data[:num_root_pages*4])
+
+        #root_stream_data = self.read(root_page_list, root_size)
 
         self.root_stream = PDB7RootStream(self.fp, root_page_list,
             index=PDB_STREAM_ROOT, size=root_size, page_size=self.page_size)
