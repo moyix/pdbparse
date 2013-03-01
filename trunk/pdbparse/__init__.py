@@ -9,12 +9,12 @@ PDB_STREAM_DBI    = 3 # debug info
 
 _PDB2_SIGNATURE = "Microsoft C/C++ program database 2.00\r\n\032JG\0\0"
 _PDB2_SIGNATURE_LEN = len(_PDB2_SIGNATURE)
-_PDB2_FMT = "<%dsLHHLL" % _PDB2_SIGNATURE_LEN
+_PDB2_FMT = "<%dsIHHII" % _PDB2_SIGNATURE_LEN
 _PDB2_FMT_SIZE = calcsize(_PDB2_FMT)
 
 _PDB7_SIGNATURE = 'Microsoft C/C++ MSF 7.00\r\n\x1ADS\0\0\0'
 _PDB7_SIGNATURE_LEN = len(_PDB7_SIGNATURE)
-_PDB7_FMT = "<%dsLLLLL" % _PDB7_SIGNATURE_LEN
+_PDB7_FMT = "<%dsIIIII" % _PDB7_SIGNATURE_LEN
 _PDB7_FMT_SIZE = calcsize(_PDB7_FMT)
 
 # Internal method to calculate the number of pages required
@@ -134,13 +134,13 @@ class PDB7RootStream(PDBStream):
 
         data = self.data
         
-        (self.num_streams,) = unpack("<L", data[:4])
+        (self.num_streams,) = unpack("<I", data[:4])
         
         # num_streams dwords giving stream sizes
         rs = data[4:]
         sizes = []
         for i in range(0,self.num_streams*4,4):
-            (stream_size,) = unpack("<L",rs[i:i+4])
+            (stream_size,) = unpack("<I",rs[i:i+4])
             # Seen in some recent symbols. Not sure what the difference between this
             # and stream_size == 0 is.
             if stream_size == 0xffffffff:
@@ -155,7 +155,7 @@ class PDB7RootStream(PDBStream):
             num_pages = _pages(sizes[i], self.page_size)
 
             if num_pages != 0:
-                pages = unpack("<" + ("%sL" % num_pages),
+                pages = unpack("<" + ("%sI" % num_pages),
                                rs[pos:pos+(num_pages*4)])
                 page_lists.append(pages)
                 pos += num_pages*4
@@ -182,7 +182,7 @@ class PDB2RootStream(PDBStream):
         rs = data[4:]
         sizes = []
         for i in range(0,self.num_streams*8,8):
-            (stream_size,ptr_reserved) = unpack("<LL",rs[i:i+8])
+            (stream_size,ptr_reserved) = unpack("<II",rs[i:i+8])
             sizes.append(stream_size)
         
         # Next comes a list of the pages that make up each stream
