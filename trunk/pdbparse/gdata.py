@@ -24,7 +24,7 @@ gsym = Struct("global",
     ))
 )
 
-GlobalsData = GreedyRange(
+GlobalsData = OptionalGreedyRange(
     Tunnel(
         PascalString("globals", length_field=ULInt16("len")),
         gsym,

@@ -19,4 +19,4 @@ IMAGE_SECTION_HEADER = Struct("IMAGE_SECTION_HEADER",
     ULInt32("Characteristics"),
 )
 
-Sections = GreedyRange(IMAGE_SECTION_HEADER)
+Sections = OptionalGreedyRange(IMAGE_SECTION_HEADER)
