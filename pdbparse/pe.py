@@ -15,7 +15,7 @@ IMAGE_SECTION_HEADER = Struct("IMAGE_SECTION_HEADER",
     ULInt32("PointerToRelocations"),
     ULInt32("PointerToLinenumbers"),
     ULInt16("NumberOfRelocations"),
-    ULInt16("NumberOfRelocations"),
+    ULInt16("NumberOfLinenumbers"),
     ULInt32("Characteristics"),
 )
 
