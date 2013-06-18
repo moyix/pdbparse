@@ -945,7 +945,7 @@ def merge_subcon(parent, subattr):
     subattr: the name of the subconstruct
     """
 
-    subcon = getattr(parent, subattr)
+    subcon = getattr(parent, subattr, None)
     if not subcon: return
 
     for a in subcon:
