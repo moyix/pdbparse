@@ -952,7 +952,7 @@ def struct_dependencies(lf):
             if is_inline_struct(base):
                 deps = deps | struct_dependencies(base)
             else:
-                deps.add(base)
+                deps.add(base.name)
     return deps
 
 def struct_pretty_str_fwd(lf, gcc):
@@ -1090,10 +1090,12 @@ if __name__ == "__main__":
               if e.leaf_type == "LF_ENUM" and not e.prop.fwdref ]
 
     dep_graph = {}
+    names = {}
     for s in structs:
         if "unnamed" in s.name: continue
-        dep_graph[s] = struct_dependencies(s)
-    dep_graph.update((e,[]) for e in enums)
+        dep_graph[s.name] = struct_dependencies(s)
+        names[s.name] = s
+    dep_graph.update((e.name,[]) for e in enums)
     structs = topological_sort(dep_graph)
     structs.reverse()
 
@@ -1102,7 +1104,8 @@ if __name__ == "__main__":
         enum_pretty_str(e)
 
     print "/*******  Structures  *******/"
-    for s in structs:
+    for n in names:
+        s = names[n]
         if "unnamed" in s.name: continue
         if s.leaf_type == "LF_ENUM": continue
         struct_pretty_str(s, opts.gcc)
