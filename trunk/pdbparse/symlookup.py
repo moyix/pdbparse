@@ -31,7 +31,8 @@ class Lookup(object):
                 pdb.STREAM_DBI.load()
                 pdb._update_names()
                 pdb.STREAM_GSYM = pdb.STREAM_GSYM.reload()
-                pdb.STREAM_GSYM.load()
+                if pdb.STREAM_GSYM.size:
+                    pdb.STREAM_GSYM.load()
                 pdb.STREAM_SECT_HDR = pdb.STREAM_SECT_HDR.reload()
                 pdb.STREAM_SECT_HDR.load()
                 # These are the dicey ones
@@ -56,6 +57,8 @@ class Lookup(object):
                 sects = pdb.STREAM_SECT_HDR.sections
                 omap = DummyOmap()
             gsyms = pdb.STREAM_GSYM
+            if not hasattr(gsyms, 'globals'):
+                gsyms.globals = []
 
             last_sect = max(sects, key=attrgetter('VirtualAddress'))
             limit = base + last_sect.VirtualAddress + last_sect.Misc.VirtualSize
