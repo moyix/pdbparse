@@ -240,7 +240,7 @@ static BOOL str_array_push(struct parsed_symbol* sym, const char* ptr, int len,
  */
 static char* str_array_get_ref(struct array* cref, unsigned idx)
 {
-    assert(cref);
+    if (!cref) return NULL;
     if (cref->start + idx >= cref->max)
     {
 //        WARN("Out of bounds: %p %d + %d >= %d\n", 
