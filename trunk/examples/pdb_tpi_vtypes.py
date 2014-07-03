@@ -5,6 +5,7 @@ import sys
 from os.path import basename
 
 vtype  = {
+    "T_HRESULT": "'unsigned long'",
     "T_32PINT4": "'pointer', ['long']",
     "T_32PRCHAR": "'pointer', ['unsigned char']",
     "T_32PUCHAR": "'pointer', ['unsigned char']",
