@@ -143,9 +143,10 @@ def handle_pe(pe_file):
     if saved_file.endswith("_"):
         os.system("cabextract %s" % saved_file)
 
-def get_pe_from_pe(filename):
+def get_pe_from_pe(filename, symname=None):
     guid = get_pe_guid(filename)
-    symname = os.path.basename(filename)
+    if symname is None:
+        symname = os.path.basename(filename)
     saved_file = download_file(guid, symname)
     if saved_file.endswith("_"):
         os.system("cabextract %s" % saved_file)
@@ -178,7 +179,7 @@ def main():
     if opts.exe:
         handle_pe(opts.exe)
     if opts.pe:
-        get_pe_from_pe(opts.pe)
+        get_pe_from_pe(opts.pe, symname=opts.symfile)
     if opts.guid and opts.symfile:
         saved_file = download_file(opts.guid, opts.symfile)
         if saved_file is not None:

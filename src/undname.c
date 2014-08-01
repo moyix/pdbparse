@@ -345,7 +345,7 @@ static const char* get_number(struct parsed_symbol* sym)
     }
     else if (*sym->current >= 'A' && *sym->current <= 'P')
     {
-        int ret = 0;
+        unsigned int ret = 0;
 
         while (*sym->current >= 'A' && *sym->current <= 'P')
         {
@@ -355,7 +355,7 @@ static const char* get_number(struct parsed_symbol* sym)
         if (*sym->current != '@') return NULL;
 
         ptr = und_alloc(sym, 17);
-        sprintf(ptr, "%s%d", sgn ? "-" : "", ret);
+        sprintf(ptr, "%s%u", sgn ? "-" : "", ret);
         sym->current++;
     }
     else return NULL;
