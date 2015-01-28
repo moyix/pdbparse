@@ -45,6 +45,7 @@ omap_rev = pdb.STREAM_OMAP_TO_SRC
 
 for tbl,addr in zip(names,addrs):
     for sym in gsyms.globals:
+        if not hasattr(sym, 'offset'): continue
         try:
             virt_base = sects[sym.segment-1].VirtualAddress
         except IndexError:
@@ -82,6 +83,7 @@ for i,val in enumerate(values):
     if not val.ServiceTable: continue
     remapped = [omap_rev.remap(f) for f in val.ServiceTable]
     for sym in gsyms.globals:
+        if not hasattr(sym, 'offset'): continue
         try:
             virt_base = sects[sym.segment-1].VirtualAddress
         except IndexError:
