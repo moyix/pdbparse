@@ -79,6 +79,11 @@ DbiDbgHeader = Struct("DbiDbgHeader",
     SLInt16("snSectionHdrOrig"),
 )
 
+sstFileIndex = Struct("sstFileIndex",
+    ULInt16("cMod"),
+    ULInt16("cRef"),
+)
+
 def parse_stream(stream):
     pos = 0
     dbihdr = DBIHeader.parse_stream(stream)
@@ -99,8 +104,28 @@ def parse_stream(stream):
     stream.seek(dbihdr.secconSize, 1)
     # "Section Map"
     stream.seek(dbihdr.secmapSize, 1)
+    #
+    # see: http://pierrelib.pagesperso-orange.fr/exec_formats/MS_Symbol_Type_v1.0.pdf
+    # the contents of the filinfSize section is a 'sstFileIndex'
+    #
     # "File Info"
-    stream.seek(dbihdr.filinfSize, 1)
+    end = stream.tell() + dbihdr.filinfSize
+    fileIndex = sstFileIndex.parse_stream(stream)
+    modStart = Array(fileIndex.cMod, ULInt16("modStart")).parse_stream(stream)
+    cRefCnt = Array(fileIndex.cMod, ULInt16("cRefCnt")).parse_stream(stream)
+    NameRef = Array(fileIndex.cRef, ULInt32("NameRef")).parse_stream(stream)
+    modules = [] # array of arrays of files
+    files = [] # array of files (non unique)
+    Names = stream.read(end - stream.tell())
+    for i in xrange(0, fileIndex.cMod):
+        these = []
+        for j in xrange(modStart[i], modStart[i]+cRefCnt[i]):
+            Name = CString("Name").parse(Names[NameRef[j]:])
+            files.append(Name)
+            these.append(Name)
+        modules.append(these)
+
+    #stream.seek(dbihdr.filinfSize, 1)
     # "TSM"
     stream.seek(dbihdr.tsmapSize, 1)
     # "EC"
@@ -110,7 +135,9 @@ def parse_stream(stream):
     
     return Container(DBIHeader=dbihdr,
                      DBIExHeaders=ListContainer(dbiexhdrs),
-                     DBIDbgHeader=dbghdr)
+                     DBIDbgHeader=dbghdr,
+                     modules=modules,
+                     files=files)
 
 def parse(data):
     return parse_stream(StringIO(data))

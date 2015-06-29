@@ -233,7 +233,9 @@ class PDBDebugStream(ParsedPDBStream):
 
         self.DBIHeader = debug.DBIHeader
         self.DBIExHeaders = debug.DBIExHeaders
-        self.DBIDbgHeader = debug.DBIDbgHeader        
+        self.DBIDbgHeader = debug.DBIDbgHeader   
+        self.modules = debug.modules
+        self.files = debug.files
 
         # For backwards compatibility
         self.gsym_file = debug.DBIHeader.symrecStream
