@@ -148,7 +148,7 @@ def get_pe_from_pe(filename, symname=None):
     if symname is None:
         symname = os.path.basename(filename)
     saved_file = download_file(guid, symname)
-    if saved_file.endswith("_"):
+    if saved_file and saved_file.endswith("_"):
         os.system("cabextract %s" % saved_file)
 
 def main():
