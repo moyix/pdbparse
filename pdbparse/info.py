@@ -1,13 +1,13 @@
 from construct import *
-from cStringIO import StringIO
+from io import BytesIO
 
 _strarray = GreedyRange(CString("names"))
 
 class StringArrayAdapter(Adapter):
     def _encode(self,obj,context):
-        return _strarray._build(StringIO(obj),context)
+        return _strarray._build(BytesIO(obj), context)
     def _decode(self,obj,context):
-        return _strarray._parse(StringIO(obj),context)
+        return _strarray._parse(BytesIO(obj), context)
 
 def GUID(name):
     return Struct(name,
