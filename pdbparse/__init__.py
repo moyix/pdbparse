@@ -22,7 +22,7 @@ _PDB7_FMT_SIZE = calcsize(_PDB7_FMT)
 # to store a stream of size "length", given a page size of
 # "pagesize"
 def _pages(length, pagesize):
-    num_pages = length / pagesize
+    num_pages = length // pagesize
     if (length % pagesize): num_pages += 1
     return num_pages
 
@@ -64,7 +64,7 @@ class StreamFile:
 
     # Private helper methods
     def _get_page(self, offset):
-        return (offset / self.page_size, offset % self.page_size)
+        return (offset // self.page_size, offset % self.page_size)
     def _read_pages(self, pages):
         s = b""
         for pn in pages:
