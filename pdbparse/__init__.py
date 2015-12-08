@@ -7,12 +7,12 @@ PDB_STREAM_PDB    = 1 # PDB stream info
 PDB_STREAM_TPI    = 2 # type info
 PDB_STREAM_DBI    = 3 # debug info
 
-_PDB2_SIGNATURE = "Microsoft C/C++ program database 2.00\r\n\032JG\0\0"
+_PDB2_SIGNATURE = b"Microsoft C/C++ program database 2.00\r\n\032JG\0\0"
 _PDB2_SIGNATURE_LEN = len(_PDB2_SIGNATURE)
 _PDB2_FMT = "<%dsIHHII" % _PDB2_SIGNATURE_LEN
 _PDB2_FMT_SIZE = calcsize(_PDB2_FMT)
 
-_PDB7_SIGNATURE = 'Microsoft C/C++ MSF 7.00\r\n\x1ADS\0\0\0'
+_PDB7_SIGNATURE = b"Microsoft C/C++ MSF 7.00\r\n\x1ADS\0\0\0"
 _PDB7_SIGNATURE_LEN = len(_PDB7_SIGNATURE)
 _PDB7_FMT = "<%dsIIIII" % _PDB7_SIGNATURE_LEN
 _PDB7_FMT_SIZE = calcsize(_PDB7_FMT)
@@ -65,7 +65,7 @@ class StreamFile:
     def _get_page(self, offset):
         return (offset / self.page_size, offset % self.page_size)
     def _read_pages(self, pages):
-        s = ''
+        s = b""
         for pn in pages:
            self.fp.seek(pn*self.page_size)
            s += self.fp.read(self.page_size)
@@ -429,7 +429,7 @@ class PDB7(PDB):
             self.fp.read(num_root_index_pages*4))
         
         # Read in the root page list
-        root_page_data = ""
+        root_page_data = b""
         for root_index in root_index_pages:
             self.fp.seek(root_index * self.page_size)
             root_page_data += self.fp.read(self.page_size)
