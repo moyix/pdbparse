@@ -162,8 +162,9 @@ class PDB7RootStream(PDBStream):
                 pos += num_pages*4
             else:
                 page_lists.append(())
-        
-        self.streams = zip(sizes, page_lists)
+
+        # use list() to make it compatible with python 3
+        self.streams = list(zip(sizes, page_lists))
 
 class PDB2RootStream(PDBStream):
     """Class representing the root stream of a PDBv2 file.
