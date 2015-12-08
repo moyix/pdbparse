@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 
 from struct import unpack,calcsize
 
@@ -204,7 +205,7 @@ class PDB2RootStream(PDBStream):
 
 class PDBInfoStream(ParsedPDBStream):
     def load(self):
-        import info
+        from pdbparse import info
         from datetime import datetime
 
         inf = info.parse_stream(self.stream_file)
