@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import absolute_import
 
 from struct import unpack,calcsize
 
@@ -7,12 +8,12 @@ PDB_STREAM_PDB    = 1 # PDB stream info
 PDB_STREAM_TPI    = 2 # type info
 PDB_STREAM_DBI    = 3 # debug info
 
-_PDB2_SIGNATURE = "Microsoft C/C++ program database 2.00\r\n\032JG\0\0"
+_PDB2_SIGNATURE = b"Microsoft C/C++ program database 2.00\r\n\032JG\0\0"
 _PDB2_SIGNATURE_LEN = len(_PDB2_SIGNATURE)
 _PDB2_FMT = "<%dsIHHII" % _PDB2_SIGNATURE_LEN
 _PDB2_FMT_SIZE = calcsize(_PDB2_FMT)
 
-_PDB7_SIGNATURE = 'Microsoft C/C++ MSF 7.00\r\n\x1ADS\0\0\0'
+_PDB7_SIGNATURE = b"Microsoft C/C++ MSF 7.00\r\n\x1ADS\0\0\0"
 _PDB7_SIGNATURE_LEN = len(_PDB7_SIGNATURE)
 _PDB7_FMT = "<%dsIIIII" % _PDB7_SIGNATURE_LEN
 _PDB7_FMT_SIZE = calcsize(_PDB7_FMT)
@@ -21,7 +22,7 @@ _PDB7_FMT_SIZE = calcsize(_PDB7_FMT)
 # to store a stream of size "length", given a page size of
 # "pagesize"
 def _pages(length, pagesize):
-    num_pages = length / pagesize
+    num_pages = length // pagesize
     if (length % pagesize): num_pages += 1
     return num_pages
 
@@ -63,9 +64,9 @@ class StreamFile:
 
     # Private helper methods
     def _get_page(self, offset):
-        return (offset / self.page_size, offset % self.page_size)
+        return (offset // self.page_size, offset % self.page_size)
     def _read_pages(self, pages):
-        s = ''
+        s = b""
         for pn in pages:
            self.fp.seek(pn*self.page_size)
            s += self.fp.read(self.page_size)
@@ -161,8 +162,9 @@ class PDB7RootStream(PDBStream):
                 pos += num_pages*4
             else:
                 page_lists.append(())
-        
-        self.streams = zip(sizes, page_lists)
+
+        # use list() to make it compatible with python 3
+        self.streams = list(zip(sizes, page_lists))
 
 class PDB2RootStream(PDBStream):
     """Class representing the root stream of a PDBv2 file.
@@ -204,7 +206,7 @@ class PDB2RootStream(PDBStream):
 
 class PDBInfoStream(ParsedPDBStream):
     def load(self):
-        import info
+        from pdbparse import info
         from datetime import datetime
 
         inf = info.parse_stream(self.stream_file)
@@ -429,7 +431,7 @@ class PDB7(PDB):
             self.fp.read(num_root_index_pages*4))
         
         # Read in the root page list
-        root_page_data = ""
+        root_page_data = b""
         for root_index in root_index_pages:
             self.fp.seek(root_index * self.page_size)
             root_page_data += self.fp.read(self.page_size)
