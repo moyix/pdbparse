@@ -219,7 +219,7 @@ class PDBInfoStream(ParsedPDBStream):
 
 class PDBTypeStream(ParsedPDBStream):
     def load(self,unnamed_hack=True,elim_fwdrefs=True):
-        import tpi
+        from pdbparse import tpi
         tpis = tpi.parse_stream(self.stream_file,unnamed_hack,elim_fwdrefs)
         self.header = tpis.TPIHeader
         self.num_types = self.header.ti_max - self.header.ti_min
@@ -230,7 +230,7 @@ class PDBTypeStream(ParsedPDBStream):
 
 class PDBDebugStream(ParsedPDBStream):
     def load(self):
-        import dbi 
+        from pdbparse import dbi 
         debug = dbi.parse_stream(self.stream_file)
 
         self.DBIHeader = debug.DBIHeader
@@ -271,7 +271,7 @@ class PDBDebugStream(ParsedPDBStream):
 
 class PDBFPOStrings(ParsedPDBStream):
     def load(self):
-        import fpo
+        from pdbparse import fpo
         self.fpo_strings = fpo.FPO_STRING_DATA.parse(self.data)
     def get_string(self, offset):
         from construct import CString
@@ -279,12 +279,12 @@ class PDBFPOStrings(ParsedPDBStream):
 
 class PDBFPOStream(ParsedPDBStream):
     def load(self):
-        import fpo
+        from pdbparse import fpo
         self.fpo = fpo.FPO_DATA_LIST.parse(self.data)
 
 class PDBNewFPOStream(ParsedPDBStream):
     def load(self):
-        import fpo
+        from pdbparse import fpo
         self.fpo = fpo.FPO_DATA_LIST_V2.parse(self.data)
     def load2(self):
         if self.parent:
@@ -294,19 +294,19 @@ class PDBNewFPOStream(ParsedPDBStream):
 
 class PDBOmapStream(ParsedPDBStream):
     def load(self):
-        import omap
+        from pdbparse import omap
         self.omap_data = omap.Omap(self.data)
     def remap(self, addr):
         return self.omap_data.remap(addr)
 
 class PDBSectionStream(ParsedPDBStream):
     def load(self):
-        import pe
+        from pdbparse import pe
         self.sections = pe.Sections.parse(self.data)
 
 class PDBGlobalSymbolStream(ParsedPDBStream):
     def load(self):
-        import gdata
+        from pdbparse import gdata
         self.globals = gdata.parse_stream(self.stream_file)
         self.vars = {}
         self.funcs = {}
