@@ -12,6 +12,5 @@ else:
     
 for stream in streams:
     ofname = basename(pdb.fp.name) + ('.%03d' % stream.index)
-    f = open(ofname, 'w')
-    f.write(stream.data)
-    f.close()
+    with open(ofname, 'w') as f:
+        f.write(stream.data)
