@@ -473,15 +473,23 @@ class PDB2(PDB):
         self.read_root(self.root_stream)
 
 def parse(filename, fast_load=False):
-    "Open a PDB file and autodetect its version"
-    f = open(filename, 'rb')
-    sig = f.read(_PDB7_SIGNATURE_LEN)
-    f.seek(0)
+    """
+    Open a PDB file and autodetect its version
+    """
+    return parse_stream(open(filename, 'rb'), fast_load)
+
+def parse_stream(stream, fast_load=False):
+    """
+    Parse a PDB image from a stream/FLO object, e.g. io.BytesIO object,
+    will autodetect its version.
+    """
+    sig = stream.read(_PDB7_SIGNATURE_LEN)
+    stream.seek(0)
     if sig == _PDB7_SIGNATURE:
-        return PDB7(f, fast_load)
+        return PDB7(stream, fast_load)
     else:
-        sig = f.read(_PDB2_SIGNATURE_LEN)
+        sig = stream.read(_PDB2_SIGNATURE_LEN)
         if sig == _PDB2_SIGNATURE:
-            f.seek(0)
-            return PDB2(f, fast_load)
+            stream.seek(0)
+            return PDB2(stream, fast_load)
     raise ValueError("Unsupported file type")
