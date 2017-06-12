@@ -38,7 +38,7 @@ from pdbparse.peinfo import *
 
 #SYM_URL = 'http://symbols.mozilla.org/firefox'
 SYM_URLS = ['http://msdl.microsoft.com/download/symbols']
-USER_AGENT = "Microsoft-Symbol-Server/6.6.0007.5"
+USER_AGENT = "Microsoft-Symbol-Server/6.11.0001.404"
 
 class PDBOpener(FancyURLopener):
     version = USER_AGENT
