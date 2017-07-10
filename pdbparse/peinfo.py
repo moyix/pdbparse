@@ -62,8 +62,8 @@ def get_nb10(dbgdata):
 def get_pe_guid(filename):
     try:
         pe = PE(filename, fast_load=True)
-    except IOError, e:
-        print e
+    except IOError as e:
+        print (e)
         sys.exit(-1)
     guidstr = "%x%x" % (pe.FILE_HEADER.TimeDateStamp,
                         pe.OPTIONAL_HEADER.SizeOfImage)

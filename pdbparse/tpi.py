@@ -1134,7 +1134,7 @@ if __name__ == "__main__":
     st = time.time()
     tpi_stream = parse_stream(open(sys.argv[1]))
     ed = time.time()
-    print "Parsed %d types in %f seconds" % (len(tpi_stream.types), ed - st)
+    print ("Parsed %d types in %f seconds" % (len(tpi_stream.types), ed - st))
 
     #for k,v in tpi_stream.types.items():
-    #    print k,v
+    #    print (k,v)
