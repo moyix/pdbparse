@@ -1132,7 +1132,10 @@ if __name__ == "__main__":
     import sys
     import time
     st = time.time()
-    tpi_stream = parse_stream(open(sys.argv[1]))
+
+    with open(sys.argv[1], 'rb') as stream:
+        tpi_stream = parse_stream(stream)
+
     ed = time.time()
     print ("Parsed %d types in %f seconds" % (len(tpi_stream.types), ed - st))
 
