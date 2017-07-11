@@ -40,8 +40,8 @@ for sym in gsyms.globals:
         off = sym.offset
         virt_base = sects[sym.segment-1].VirtualAddress
         nm = cstring(sects[sym.segment-1].Name)
-        print "%s,%#x,%d,%s" % (sym.name,imgbase+omap.remap(off+virt_base),sym.symtype,nm)
-    except IndexError,e:
+        print ("%s,%#x,%d,%s" % (sym.name,imgbase+omap.remap(off+virt_base),sym.symtype,nm))
+    except IndexError  as e:
         print ("Skipping %s, segment %d does not exist" % (sym.name,sym.segment-1), file=sys.stderr)
-    except AttributeError,e:
+    except AttributeError as e:
         pass

@@ -106,7 +106,7 @@ class PDBStream:
         """Convenience method. Reloads a PDBStream. May return a more specialized type."""
         try:
             pdb_cls = self.parent._stream_map[self.index]
-        except (KeyError,AttributeError):
+        except (KeyError,AttributeError) as e:
             pdb_cls = PDBStream
         return pdb_cls(self.fp, self.pages, self.index, size=self.size,
                 page_size=self.page_size, fast_load=self.fast_load,

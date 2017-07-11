@@ -90,7 +90,7 @@ def download_file(guid,fname,path="",quiet=False):
                     print ()
                     print ("Saved symbols to %s" % (outfile))
                 return outfile
-            except urllib2.HTTPError, e:
+            except urllib2.HTTPError as e:
                 if not quiet:
                     print ("HTTP error %u" % (e.code))
     return None
