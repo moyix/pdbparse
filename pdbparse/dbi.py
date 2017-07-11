@@ -2,6 +2,9 @@
 
 from construct import *
 
+# Python 2 and 3: forward-compatible
+from builtins import range 
+
 _ALIGN = 4
 
 def get_parsed_size(tp,con):
@@ -143,9 +146,9 @@ def parse_stream(stream):
     modules = [] # array of arrays of files
     files = [] # array of files (non unique)
     Names = stream.read(end - stream.tell())
-    for i in xrange(0, fileIndex.cMod):
+    for i in range(0, fileIndex.cMod):
         these = []
-        for j in xrange(modStart[i], modStart[i]+cRefCnt[i]):
+        for j in range(modStart[i], modStart[i]+cRefCnt[i]):
             Name = CString("Name").parse(Names[NameRef[j]:])
             files.append(Name)
             these.append(Name)
