@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
-from construct import *
+# Python 2 and 3
+from io import BytesIO
 
 # Python 2 and 3: forward-compatible
 from builtins import range 
+
+from construct import *
 
 _ALIGN = 4
 
@@ -169,4 +172,4 @@ def parse_stream(stream):
                      files=files)
 
 def parse(data):
-    return parse_stream(StringIO(data))
+    return parse_stream(BytesIO(data))

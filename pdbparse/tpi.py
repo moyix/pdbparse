@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 
+# Python 2 and 3
+from io import BytesIO
+
 from construct import *
-from cStringIO import StringIO
+
 
 # For each metatype, which attributes are references
 # to another type
@@ -1126,7 +1129,7 @@ def parse_stream(fp, unnamed_hack=True, elim_fwdrefs=True):
     return tpi_stream
 
 def parse(data, unnamed_hack=True, elim_fwdrefs=True):
-    return parse_stream(StringIO(data), unnamed_hack, elim_fwdrefs)
+    return parse_stream(BytesIO(data), unnamed_hack, elim_fwdrefs)
     
 if __name__ == "__main__":
     import sys

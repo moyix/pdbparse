@@ -1,5 +1,7 @@
+# Python 2 and 3
+from io import BytesIO
+
 from construct import *
-from cStringIO import StringIO
 from pdbparse.tpi import merge_subcon
 
 gsym = Struct("global",
