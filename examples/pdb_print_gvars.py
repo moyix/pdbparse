@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import sys
 import pdbparse
@@ -41,6 +42,6 @@ for sym in gsyms.globals:
         nm = cstring(sects[sym.segment-1].Name)
         print "%s,%#x,%d,%s" % (sym.name,imgbase+omap.remap(off+virt_base),sym.symtype,nm)
     except IndexError,e:
-        print >> sys.stderr, "Skipping %s, segment %d does not exist" % (sym.name,sym.segment-1)
+        print ("Skipping %s, segment %d does not exist" % (sym.name,sym.segment-1), file=sys.stderr)
     except AttributeError,e:
         pass
