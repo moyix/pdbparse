@@ -28,13 +28,22 @@ You can see an explanation of the URL format at:
 http://jimmers.info/pdb.html
 '''
 
-import urllib2
 import sys,os
 import os.path
 from pefile import PE
 from shutil import copyfileobj
-from urllib import FancyURLopener
+
 from pdbparse.peinfo import *
+
+try:
+    from urllib.parse import urlparse, urlencode
+    from urllib.request import urlopen, Request, build_opener, FancyURLopener
+    from urllib.error import HTTPError
+except ImportError:
+    from urlparse import urlparse
+    from urllib import urlencode
+    from urllib2 import urlopen, Request, HTTPError, build_opener
+    from urllib import FancyURLopener
 
 #SYM_URL = 'http://symbols.mozilla.org/firefox'
 SYM_URLS = ['http://msdl.microsoft.com/download/symbols']
@@ -44,7 +53,7 @@ class PDBOpener(FancyURLopener):
     version = USER_AGENT
     def http_error_default(self, url, fp, errcode, errmsg, headers):
         if errcode == 404:
-            raise urllib2.HTTPError(url, errcode, errmsg, headers, fp)
+            raise HTTPError(url, errcode, errmsg, headers, fp)
         else:
             FancyURLopener.http_error_default(url, fp, errcode, errmsg, headers)
 
@@ -75,7 +84,7 @@ def download_file(guid,fname,path="",quiet=False):
 
     for sym_url in SYM_URLS:
         url = sym_url + "/%s/%s/" % (fname,guid)
-        opener = urllib2.build_opener()
+        opener = build_opener()
         
         # Whatever extension the user has supplied it must be replaced with .pd_
         tries = [ fname[:-1] + '_', fname ]
@@ -90,7 +99,7 @@ def download_file(guid,fname,path="",quiet=False):
                     print ()
                     print ("Saved symbols to %s" % (outfile))
                 return outfile
-            except urllib2.HTTPError as e:
+            except HTTPError as e:
                 if not quiet:
                     print ("HTTP error %u" % (e.code))
     return None
