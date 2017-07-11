@@ -157,85 +157,85 @@ ctype_intro  = {
 }
 
 def print_basic_types():
-    print "/******* Define basic Windows types *******/"
-    print
-    print "// If compiling with gcc, use -fms-extensions"
-    print
-    print "#include <stdint.h>"
-    print
-    print "typedef  uint8_t     UINT8;"
-    print "typedef  uint8_t     UCHAR;"
-    print "typedef  uint8_t      BOOL;"
-    print
-    print "typedef   int8_t      CHAR;"
-    print "typedef   int8_t      INT8;"
-    print
-    print "typedef uint16_t    UINT16;"
-    print "typedef uint16_t    USHORT;"
-    print "typedef  int16_t     SHORT;"
-    print
-    print "typedef uint32_t    UINT32;"
-    print "typedef uint32_t     ULONG;"
-    print "typedef  int32_t      LONG;"
-    print
-    print "typedef uint64_t    UINT64;"
-    print "typedef uint64_t ULONGLONG;"
-    print "typedef  int64_t  LONGLONG;"
-    print
-    print "typedef uint64_t   PVOID64, PPVOID64;"
-    print "typedef uint32_t   PVOID32, PPVOID32;"
-    print "typedef     void      VOID;"
-    print
-    print "#ifdef WINDOWS_USE_32_BIT_POINTERS ///////////////"
-    print "// pointers occupy exactly 32 bits"
-    print "typedef  UINT32     PUINT8;"
-    print "typedef  UINT32     PUCHAR;"
-    print "typedef  UINT32      PBOOL;"
-    print
-    print "typedef  UINT32      PCHAR;"
-    print "typedef  UINT32      PINT8;"
-    print
-    print "typedef  UINT32    PUINT16;"
-    print "typedef  UINT32    PUSHORT;"
-    print "typedef  UINT32     PSHORT;"
-    print
-    print "typedef  UINT32     PUINT32;"
-    print "typedef  UINT32      PULONG;"
-    print "typedef  UINT32       PLONG;"
-    print
-    print "typedef  UINT32     PUINT64;"
-    print "typedef  UINT32  PULONGLONG;"
-    print "typedef  UINT32   PLONGLONG;"
-    print
-    print "typedef  UINT32       PVOID, PPVOID;"
-    print
-    print "#else /////////////////  !WINDOWS_USE_32_BIT_POINTERS"
-    print "// pointers occupy native address width per ABI"
-    print "typedef     UINT8     *PUINT8;"
-    print "typedef     UCHAR     *PUCHAR;"
-    print "typedef      BOOL      *PBOOL;"
-    print
-    print "typedef      CHAR      *PCHAR;"
-    print "typedef      INT8      *PINT8;"
-    print
-    print "typedef    UINT16    *PUINT16;"
-    print "typedef    USHORT    *PUSHORT;"
-    print "typedef     SHORT     *PSHORT;"
-    print
-    print "typedef    UINT32    *PUINT32;"
-    print "typedef     ULONG     *PULONG;"
-    print "typedef      LONG      *PLONG;"
-    print
-    print "typedef    UINT64    *PUINT64;"
-    print "typedef ULONGLONG *PULONGLONG;"
-    print "typedef  LONGLONG  *PLONGLONG;"
-    print
-    print "typedef      VOID      *PVOID, **PPVOID;"
-    print
-    print "#endif /////////////////  WINDOWS_USE_32_BIT_POINTERS"
-    print "\n\n\n"
-    print "#define P(basetype, var) ( (basetype *)(var))"
-    print "\n\n\n"
+    print ( "/******* Define basic Windows types *******/" )
+    print ()
+    print ( "// If compiling with gcc, use -fms-extensions" )
+    print ()
+    print ( "#include <stdint.h>" )
+    print ()
+    print ( "typedef  uint8_t     UINT8;" )
+    print ( "typedef  uint8_t     UCHAR;" )
+    print ( "typedef  uint8_t      BOOL;" )
+    print ()
+    print ( "typedef   int8_t      CHAR;" )
+    print ( "typedef   int8_t      INT8;" )
+    print ()
+    print ( "typedef uint16_t    UINT16;" )
+    print ( "typedef uint16_t    USHORT;" )
+    print ( "typedef  int16_t     SHORT;" )
+    print ()
+    print ( "typedef uint32_t    UINT32;" )
+    print ( "typedef uint32_t     ULONG;" )
+    print ( "typedef  int32_t      LONG;" )
+    print ()
+    print ( "typedef uint64_t    UINT64;" )
+    print ( "typedef uint64_t ULONGLONG;" )
+    print ( "typedef  int64_t  LONGLONG;" )
+    print ()
+    print ( "typedef uint64_t   PVOID64, PPVOID64;" )
+    print ( "typedef uint32_t   PVOID32, PPVOID32;" )
+    print ( "typedef     void      VOID;" )
+    print ()
+    print ( "#ifdef WINDOWS_USE_32_BIT_POINTERS ///////////////" )
+    print ( "// pointers occupy exactly 32 bits" )
+    print ( "typedef  UINT32     PUINT8;" )
+    print ( "typedef  UINT32     PUCHAR;" )
+    print ( "typedef  UINT32      PBOOL;" )
+    print ()
+    print ( "typedef  UINT32      PCHAR;" )
+    print ( "typedef  UINT32      PINT8;" )
+    print ()
+    print ( "typedef  UINT32    PUINT16;" )
+    print ( "typedef  UINT32    PUSHORT;" )
+    print ( "typedef  UINT32     PSHORT;" )
+    print ()
+    print ( "typedef  UINT32     PUINT32;" )
+    print ( "typedef  UINT32      PULONG;" )
+    print ( "typedef  UINT32       PLONG;" )
+    print ()
+    print ( "typedef  UINT32     PUINT64;" )
+    print ( "typedef  UINT32  PULONGLONG;" )
+    print ( "typedef  UINT32   PLONGLONG;" )
+    print ()
+    print ( "typedef  UINT32       PVOID, PPVOID;" )
+    print ()
+    print ( "#else /////////////////  !WINDOWS_USE_32_BIT_POINTERS" )
+    print ( "// pointers occupy native address width per ABI" )
+    print ( "typedef     UINT8     *PUINT8;" )
+    print ( "typedef     UCHAR     *PUCHAR;" )
+    print ( "typedef      BOOL      *PBOOL;" )
+    print ()
+    print ( "typedef      CHAR      *PCHAR;" )
+    print ( "typedef      INT8      *PINT8;" )
+    print ()
+    print ( "typedef    UINT16    *PUINT16;" )
+    print ( "typedef    USHORT    *PUSHORT;" )
+    print ( "typedef     SHORT     *PSHORT;" )
+    print ()
+    print ( "typedef    UINT32    *PUINT32;" )
+    print ( "typedef     ULONG     *PULONG;" )
+    print ( "typedef      LONG      *PLONG;" )
+    print ()
+    print ( "typedef    UINT64    *PUINT64;" )
+    print ( "typedef ULONGLONG *PULONGLONG;" )
+    print ( "typedef  LONGLONG  *PLONGLONG;" )
+    print ()
+    print ( "typedef      VOID      *PVOID, **PPVOID;" )
+    print ()
+    print ( "#endif /////////////////  WINDOWS_USE_32_BIT_POINTERS" )
+    print ( "\n\n\n" )
+    print ( "#define P(basetype, var) ( (basetype *)(var))" )
+    print ( "\n\n\n" )
 
     
 base_type_size = {
@@ -371,7 +371,7 @@ def is_inline_struct(lf):
         return True
     else:
         try:
-            if "unnamed" in lf.name: print lf.leaf_type
+            if "unnamed" in lf.name: print(lf.leaf_type)
         except:
             pass
     return False
@@ -418,7 +418,7 @@ def get_size(lf):
     elif lf.leaf_type == "LF_BITFIELD":
         return 1.0 * lf.length / 8
     else:
-        print >>sys.stderr, "ERROR: don't know how to get size for %s" % lf.leaf_type
+        print ("ERROR: don't know how to get size for %s" % lf.leaf_type, file=sys.stderr)
         return -1
 
 def get_basetype(lf):
@@ -464,11 +464,11 @@ def arr_str(arr, name):
     tpname = get_tpname(arr.element_type)
     sz = get_size(arr.element_type)
     if sz == 0:
-        print >>sys.stderr,"ERROR with array %s %s" % (tpname, name)
+        print ("ERROR with array %s %s" % (tpname, name), file=sys.stderr)
     if sz < 0:
-        print >>sys.stderr,"ERROR with array %s %s -- element size is negative" % (tpname, name)
+        print ("ERROR with array %s %s -- element size is negative" % (tpname, name), file=sys.stderr)
     if arr.size < 0:
-        print >>sys.stderr,"ERROR with array %s %s -- size is negative" % (tpname, name)
+        print ("ERROR with array %s %s -- size is negative" % (tpname, name), file=sys.stderr)
     count = arr.size / sz
     return memb_str(arr.element_type, "%s[0x%x]" % (name,count))
     #return "%s %s[%d]" % (tpname, name, count)
@@ -956,31 +956,31 @@ def struct_dependencies(lf):
     return deps
 
 def struct_pretty_str_fwd(lf, gcc):
-    print "%s %s { // %#x bytes" % (snames[lf.leaf_type], mangle(lf.name), lf.size)
-    print flstr(lf)
+    print ("%s %s { // %#x bytes" % (snames[lf.leaf_type], mangle(lf.name), lf.size))
+    print (flstr(lf))
     if gcc:
-        print "} __attribute__((packed));"
+        print ("} __attribute__((packed));")
     else:
-        print "};"
+        print ("};")
     print
 
 def struct_pretty_str_nofwd(lf, gcc):
-    print "typedef %s %s { // %#x bytes" % (snames[lf.leaf_type], mangle(lf.name), lf.size)
-    print flstr(lf)
+    print ("typedef %s %s { // %#x bytes" % (snames[lf.leaf_type], mangle(lf.name), lf.size))
+    print (flstr(lf))
     if gcc:
-        print "} __attribute__((packed)) %s, *P%s, **PP%s ;" % ((demangle(lf.name),)*3)
+        print ("} __attribute__((packed)) %s, *P%s, **PP%s ;" % ((demangle(lf.name),)*3))
     else:
-        print "} %s, *P%s, **PP%s ;" % ((demangle(lf.name),)*3)
+        print ("} %s, *P%s, **PP%s ;" % ((demangle(lf.name),)*3))
     print
 
 def enum_pretty_str(enum):
     #if not enum.name.startswith("_"):
     #    name = "_" + enum.name
     #else: name = enum.name
-    print "typedef enum %s {" % mangle(enum.name)
-    print flstr(enum)
-    print "} %s;" % demangle(enum.name)
-    print
+    print ("typedef enum %s {" % mangle(enum.name))
+    print (flstr(enum))
+    print ("} %s;" % demangle(enum.name))
+    print ()
 
 themes = {
     "msvc": ctype_msvc,
@@ -1043,11 +1043,11 @@ if __name__ == "__main__":
 
             # sets global ARCH_PTR_SIZE
             if pdb.STREAM_DBI.machine in ('IMAGE_FILE_MACHINE_I386'):
-                print "// Architecture pointer width 4 bytes"
+                print ("// Architecture pointer width 4 bytes")
                 ARCH_PTR_SIZE = 4
             elif pdb.STREAM_DBI.machine in ('IMAGE_FILE_MACHINE_AMD64',
                                             'IMAGE_FILE_MACHINE_IA64'):
-                print "// Architecture pointer width 8 bytes"
+                print ("// Architecture pointer width 8 bytes")
                 ARCH_PTR_SIZE = 8
 
         except:
@@ -1058,28 +1058,29 @@ if __name__ == "__main__":
             
     if opts.macroguard:
         macroguard_str = "_WINDOWS_PDB_" + os.path.basename(args[0]).replace('.', '_') + "_defns"
-        print "#ifndef %s" % macroguard_str
-        print "#define %s" % macroguard_str
-        print
-        
+        print ("#ifndef %s" % macroguard_str)
+        print ("#define %s" % macroguard_str)
+        print ()
+
     if opts.gcc:
         print_basic_types()
         
     if opts.fwdrefs:
         fwdrefs = [ s for s in pdb.streams[2].types.values()
                     if s.leaf_type in ("LF_STRUCTURE","LF_UNION") and s.prop.fwdref ]
-        print "/******* Forward Refs *******/"
+        print ("/******* Forward Refs *******/")
         for f in fwdrefs:
-            print "%s %s;" % (snames[f.leaf_type], mangle(f.name))
-            print "typedef %s %s %s;" % \
-                (snames[f.leaf_type], mangle(f.name),demangle(f.name))
-            print "#ifdef WINDOWS_USE_32_BIT_POINTERS"
-            print "   typedef %s P%s, PP%s; // pointers take up 32 bits" % \
-                ("UINT32", demangle(f.name), demangle(f.name))
-            print "#else"
-            print "   typedef %s *P%s, **PP%s;" % ((demangle(f.name),)*3)
-            print "#endif"
-            print
+            print ("%s %s;" % (snames[f.leaf_type], mangle(f.name)))
+            print ("typedef %s %s %s;" % \
+                (snames[f.leaf_type], mangle(f.name),demangle(f.name)))
+            print ("#ifdef WINDOWS_USE_32_BIT_POINTERS")
+            print ("   typedef %s P%s, PP%s; // pointers take up 32 bits" % \
+                ("UINT32", demangle(f.name), demangle(f.name)))
+            print ("#else")
+            print ("   typedef %s *P%s, **PP%s;" % ((demangle(f.name),)*3))
+            print ("#endif")
+            print ()
+
         # Reload the file without fwdrefs as it messes up type sizes
         pdb = pdbparse.parse(args[0])
 
@@ -1099,11 +1100,11 @@ if __name__ == "__main__":
     structs = topological_sort(dep_graph)
     structs.reverse()
 
-    print "/******* Enumerations *******/"
+    print ("/******* Enumerations *******/")
     for e in enums:
         enum_pretty_str(e)
 
-    print "/*******  Structures  *******/"
+    print ("/*******  Structures  *******/")
     for n in names:
         s = names[n]
         if "unnamed" in s.name: continue
@@ -1111,4 +1112,4 @@ if __name__ == "__main__":
         struct_pretty_str(s, opts.gcc)
 
     if opts.macroguard:
-        print "#endif // #define %s" % macroguard_str
+        print ("#endif // #define %s" % macroguard_str)

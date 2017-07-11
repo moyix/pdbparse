@@ -52,9 +52,9 @@ lastprog = None
 def progress(blocks,blocksz,totalsz):
     global lastprog
     if lastprog is None:
-        print "Connected. Downloading data..."
+        print ("Connected. Downloading data...")
     percent = int((100*(blocks*blocksz)/float(totalsz)))
-    if lastprog != percent and percent % 5 == 0: print "%d%%" % percent,
+    if lastprog != percent and percent % 5 == 0: print ("%d%%" % percent)
     lastprog = percent
     sys.stdout.flush()
 
@@ -71,7 +71,7 @@ def download_file(guid,fname,path="",quiet=False):
     # Exception: old-style PEs without a debug section use 
     # TimeDateStamp+SizeOfImage
     if len(guid) == 32:
-        print "Warning: GUID is too short to be valid. Did you append the Age field?"
+        print ("Warning: GUID is too short to be valid. Did you append the Age field?")
 
     for sym_url in SYM_URLS:
         url = sym_url + "/%s/%s/" % (fname,guid)
@@ -81,18 +81,18 @@ def download_file(guid,fname,path="",quiet=False):
         tries = [ fname[:-1] + '_', fname ]
 
         for t in tries:
-            if not quiet: print "Trying %s" % (url+t)
+            if not quiet: print ("Trying %s" % (url+t))
             outfile = os.path.join(path,t)
             try:
                 hook = None if quiet else progress
                 PDBOpener().retrieve(url+t, outfile, reporthook=hook)
                 if not quiet:
-                    print
-                    print "Saved symbols to %s" % (outfile)
+                    print ()
+                    print ("Saved symbols to %s" % (outfile))
                 return outfile
             except urllib2.HTTPError, e:
                 if not quiet:
-                    print "HTTP error %u" % (e.code)
+                    print ("HTTP error %u" % (e.code))
     return None
 
 def handle_pe(pe_file):
@@ -104,7 +104,7 @@ def handle_pe(pe_file):
         elif dbgdata[:4] == "NB10":
             (guid,filename) = get_nb10(dbgdata)
         else:
-            print "ERR: CodeView section not NB10 or RSDS"
+            print ("ERR: CodeView section not NB10 or RSDS")
             return
         guid = guid.upper()
         saved_file = download_file(guid,filename)
@@ -134,10 +134,10 @@ def handle_pe(pe_file):
             guid = guid.upper()
             saved_file = download_file(guid,filename)
         else:
-            print "WARN: DBG file received from symbol server has unknown CodeView section"
+            print ("WARN: DBG file received from symbol server has unknown CodeView section")
             return
     else:
-        print "Unknown type:",tp
+        print ("Unknown type:",tp)
         return
 
     if saved_file.endswith("_"):
