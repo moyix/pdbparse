@@ -13,7 +13,7 @@ class DummyOmap(object):
         return addr
 
 def cstring(str):
-    return str.split('\0')[0]
+    return str.split(b'\0')[0]
 
 parser = OptionParser()
 (opts, args) = parser.parse_args()
