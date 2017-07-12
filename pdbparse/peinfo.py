@@ -22,9 +22,9 @@ def get_pe_debug_data(filename):
 def get_external_codeview(filename):
     pe = PE(filename, fast_load=True)
     dbgdata = get_debug_data(pe, DEBUG_TYPE[u'IMAGE_DEBUG_TYPE_CODEVIEW'])
-    if dbgdata[:4] == u'RSDS':
+    if dbgdata[:4] == b'RSDS':
         (guid,filename) = get_rsds(dbgdata)
-    elif dbgdata[:4] == u'NB10':
+    elif dbgdata[:4] == b'NB10':
         (guid,filename) = get_nb10(dbgdata)
     else:
         raise TypeError(u'Invalid CodeView signature: [%s]' % dbgdata[:4])
@@ -55,7 +55,7 @@ def get_dbg_fname(dbgdata):
 def get_rsds(dbgdata):
     dbg = CV_RSDS_HEADER.parse(dbgdata)
     guidstr = "%08x%04x%04x%s%x" % (dbg.GUID.Data1, dbg.GUID.Data2, 
-                              dbg.GUID.Data3, dbg.GUID.Data4.encode('hex'),
+                              dbg.GUID.Data3, binascii.hexlify(dbg.GUID.Data4),
                               dbg.Age)
     return guidstr,ntpath.basename(dbg.Filename)
 
