@@ -1,6 +1,11 @@
-from pefile import PE, DEBUG_TYPE, DIRECTORY_ENTRY
 import ntpath
+import binascii
+
+from pefile import PE, DEBUG_TYPE, DIRECTORY_ENTRY
 from pdbparse.dbgold import CV_RSDS_HEADER, CV_NB10_HEADER, DebugDirectoryType
+      
+class PENoDebugDirectoryEntriesError(Exception):
+    pass
 
 def get_pe_debug_data(filename):
     pe = PE(filename, fast_load=True)
