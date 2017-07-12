@@ -41,7 +41,7 @@ FPO_DATA_LIST_V2 = GreedyRange(FPO_DATA_V2)
 # May move this to a new file; in private symbols the values
 # include things that are not just FPO related.
 FPO_STRING_DATA = Struct("FPO_STRING_DATA",
-    Const(Bytes("Signature",4), "\xFE\xEF\xFE\xEF"),
+    Const(Bytes("Signature",4), b"\xFE\xEF\xFE\xEF"),
     ULInt32("Unk1"),
     ULInt32("szDataLen"),
     Union("StringData",

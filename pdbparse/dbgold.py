@@ -6,14 +6,14 @@ from pdbparse.fpo import FPO_DATA
 from pdbparse.info import GUID
 
 CV_RSDS_HEADER = Struct("CV_RSDS",
-    Const(Bytes("Signature", 4), "RSDS"),
+    Const(Bytes("Signature", 4), b"RSDS"),
     GUID("GUID"),
     ULInt32("Age"),
     CString("Filename"),
 )
 
 CV_NB10_HEADER = Struct("CV_NB10",
-    Const(Bytes("Signature", 4), "NB10"),
+    Const(Bytes("Signature", 4), b"NB10"),
     ULInt32("Offset"),
     ULInt32("Timestamp"),
     ULInt32("Age"),
@@ -41,7 +41,7 @@ DebugMiscType = Enum(ULInt32("Type"),
 )
 
 IMAGE_SEPARATE_DEBUG_HEADER = Struct("IMAGE_SEPARATE_DEBUG_HEADER",
-    Const(Bytes("Signature", 2), "DI"),
+    Const(Bytes("Signature", 2), b"DI"),
     ULInt16("Flags"),
     ULInt16("Machine"),
     ULInt16("Characteristics"),

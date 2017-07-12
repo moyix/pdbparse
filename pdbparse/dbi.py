@@ -27,7 +27,7 @@ def SymbolRange(name):
     )
 
 DBIHeader = Struct("DBIHeader",
-    Const(Bytes("magic", 4), "\xFF\xFF\xFF\xFF"),                           # 0
+    Const(Bytes("magic", 4), b"\xFF\xFF\xFF\xFF"),                          # 0
     ULInt32("version"),                                                     # 4
     ULInt32("age"),                                                         # 8
     SLInt16("gssymStream"),                                                 # 12
