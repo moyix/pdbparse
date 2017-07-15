@@ -53,18 +53,45 @@ def get_dbg_fname(dbgdata):
     return ntpath.basename(dbgstruct.Strings[0])
 
 def get_rsds(dbgdata):
+    """
+        Parse the RSDS header using construct.
+        Parameter:
+            * (bytes) dbgdata, the raw bytes header 
+        Return :
+            * (str) the GUID
+            * (str) the pdb filename
+    """
     dbg = CV_RSDS_HEADER.parse(dbgdata)
-    guidstr = "%08x%04x%04x%s%x" % (dbg.GUID.Data1, dbg.GUID.Data2, 
-                              dbg.GUID.Data3, binascii.hexlify(dbg.GUID.Data4),
-                              dbg.Age)
-    return guidstr,ntpath.basename(dbg.Filename)
+    guidstr = u"%08x%04x%04x%s%x" % (
+        dbg.GUID.Data1, dbg.GUID.Data2, dbg.GUID.Data3,  
+        binascii.hexlify(dbg.GUID.Data4).decode('ascii'),
+        dbg.Age)
+    filename = ntpath.basename(dbg.Filename.decode('ascii'))
+    return guidstr,filename
 
 def get_nb10(dbgdata):
+    """
+        Parse the NB10 header using construct.
+        Parameter:
+            * (bytes) dbgdata, the raw bytes header 
+        Return :
+            * the GUID string (i.e. file timestamp)
+            * the pdb filename str
+    """
     dbg = CV_NB10_HEADER.parse(dbgdata)
-    guidstr = "%x%x" % (dbg.Timestamp, dbg.Age)
-    return guidstr,ntpath.basename(dbg.Filename)
+    guidstr = u"%x%x" % (dbg.Timestamp, dbg.Age)
+    filename = ntpath.basename(dbg.Filename.decode('ascii'))
+    return guidstr,filename
+
 
 def get_pe_guid(filename):
+    """
+        Return the PE GUID based on TimeDateStamp and SizeOfImage.
+        Parameter:
+            * (str) PE filename
+        Returns:
+            * (str) PE GUID
+    """
     try:
         pe = PE(filename, fast_load=True)
     except IOError as e:

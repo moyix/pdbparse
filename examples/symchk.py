@@ -108,9 +108,9 @@ def handle_pe(pe_file):
     dbgdata, tp = get_pe_debug_data(pe_file)
     if tp == "IMAGE_DEBUG_TYPE_CODEVIEW":
         # XP+
-        if dbgdata[:4] == "RSDS":
+        if dbgdata[:4] == b"RSDS":
             (guid,filename) = get_rsds(dbgdata)
-        elif dbgdata[:4] == "NB10":
+        elif dbgdata[:4] == b"NB10":
             (guid,filename) = get_nb10(dbgdata)
         else:
             print ("ERR: CodeView section not NB10 or RSDS")
@@ -149,7 +149,7 @@ def handle_pe(pe_file):
         print ("Unknown type:",tp)
         return
 
-    if saved_file.endswith("_"):
+    if saved_file != None and saved_file.endswith("_"):
         os.system("cabextract %s" % saved_file)
 
 def get_pe_from_pe(filename, symname=None):
