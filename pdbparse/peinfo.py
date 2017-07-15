@@ -20,6 +20,14 @@ def get_pe_debug_data(filename):
     return dbgdata, type
 
 def get_external_codeview(filename):
+    """
+        Extract filename's debug CodeView information.
+        Parameter:
+            * (bytes) filename, path to input PE 
+        Return :
+            * (str) the GUID
+            * (str) the pdb filename
+    """
     pe = PE(filename, fast_load=True)
     dbgdata = get_debug_data(pe, DEBUG_TYPE[u'IMAGE_DEBUG_TYPE_CODEVIEW'])
     if dbgdata[:4] == b'RSDS':
