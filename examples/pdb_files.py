@@ -8,13 +8,11 @@ import pdbparse
 from pdbparse.peinfo import *
 from binascii import hexlify
 
-
-if __name__ == u'__main__':
-	pepath = sys.argv[1]
-
+def main (pepath):
+	
 	# Extract debug infos from PE. 
 	guid, pdb_filename = get_external_codeview(pepath)
-	print("PE Codeview infos : %s, %s" % (pdb_filename, guid))
+	print("PE debug infos : %s, %s" % (pdb_filename, guid))
 	
 
 	# Extract corresponding PDB. 
@@ -42,5 +40,10 @@ if __name__ == u'__main__':
 			print("[%d] DBI Module : %s" % (i, module_name))
 			for fn in fns:
 				print(u'\t%s' % fn)
-			print(u'-')
+			print(u'-')	
+
+if __name__ == u'__main__':
+	pepath = sys.argv[1]
+	main(pepath)
+
 
