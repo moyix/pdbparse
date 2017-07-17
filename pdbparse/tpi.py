@@ -41,319 +41,431 @@ type_refs = {
 }
 
 ### Enums for base and leaf types
+# Exported from https://github.com/Microsoft/microsoft-pdb/cvinfo.h#L335
 # Note: python only supports a max of 255 arguments to
 # a function, so we have to put it into a dict and then
 # call the function with the ** operator
 base_types = {
-    'T_NOTYPE'                : 0x00000000,
-    'T_ABS'                   : 0x00000001,
-    'T_SEGMENT'               : 0x00000002,
-    'T_VOID'                  : 0x00000003,
+    #      Special Types
 
-    'T_HRESULT'               : 0x00000008,
-    'T_32PHRESULT'            : 0x00000408,
-    'T_64PHRESULT'            : 0x00000608,
+    "T_NOTYPE"        : 0x0000,   # uncharacterized type (no type)
+    "T_ABS"           : 0x0001,   # absolute symbol
+    "T_SEGMENT"       : 0x0002,   # segment type
+    "T_VOID"          : 0x0003,   # void
+    "T_HRESULT"       : 0x0008,   # OLE/COM HRESULT
+    "T_32PHRESULT"    : 0x0408,   # OLE/COM HRESULT __ptr32 *
+    "T_64PHRESULT"    : 0x0608,   # OLE/COM HRESULT __ptr64 *
 
-    'T_PVOID'                 : 0x00000103,
-    'T_PFVOID'                : 0x00000203,
-    'T_PHVOID'                : 0x00000303,
-    'T_32PVOID'               : 0x00000403,
-    'T_32PFVOID'              : 0x00000503,
-    'T_64PVOID'               : 0x00000603,
+    "T_PVOID"         : 0x0103,   # near pointer to void
+    "T_PFVOID"        : 0x0203,   # far pointer to void
+    "T_PHVOID"        : 0x0303,   # huge pointer to void
+    "T_32PVOID"       : 0x0403,   # 32 bit pointer to void
+    "T_32PFVOID"      : 0x0503,   # 16:32 pointer to void
+    "T_64PVOID"       : 0x0603,   # 64 bit pointer to void
+    "T_CURRENCY"      : 0x0004,   # BASIC 8 byte currency value
+    "T_NBASICSTR"     : 0x0005,   # Near BASIC string
+    "T_FBASICSTR"     : 0x0006,   # Far BASIC string
+    "T_NOTTRANS"      : 0x0007,   # type not translated by cvpack
+    "T_BIT"           : 0x0060,   # bit
+    "T_PASCHAR"       : 0x0061,   # Pascal CHAR
+    "T_BOOL32FF"      : 0x0062,   # 32-bit BOOL where true is 0xffffffff
 
-    'T_CURRENCY'              : 0x00000004,
-    'T_NBASICSTR'             : 0x00000005,
-    'T_FBASICSTR'             : 0x00000006,
-    'T_NOTTRANS'              : 0x00000007,
-    'T_BIT'                   : 0x00000060,
-    'T_PASCHAR'               : 0x00000061,
 
-    'T_CHAR'                  : 0x00000010,
-    'T_PCHAR'                 : 0x00000110,
-    'T_PFCHAR'                : 0x00000210,
-    'T_PHCHAR'                : 0x00000310,
-    'T_32PCHAR'               : 0x00000410,
-    'T_32PFCHAR'              : 0x00000510,
-    'T_64PCHAR'               : 0x00000610,
+#      Character types
 
-    'T_UCHAR'                 : 0x00000020,
-    'T_PUCHAR'                : 0x00000120,
-    'T_PFUCHAR'               : 0x00000220,
-    'T_PHUCHAR'               : 0x00000320,
-    'T_32PUCHAR'              : 0x00000420,
-    'T_32PFUCHAR'             : 0x00000520,
-    'T_64PUCHAR'              : 0x00000620,
+    "T_CHAR"          : 0x0010,   # 8 bit signed
+    "T_PCHAR"         : 0x0110,   # 16 bit pointer to 8 bit signed
+    "T_PFCHAR"        : 0x0210,   # 16:16 far pointer to 8 bit signed
+    "T_PHCHAR"        : 0x0310,   # 16:16 huge pointer to 8 bit signed
+    "T_32PCHAR"       : 0x0410,   # 32 bit pointer to 8 bit signed
+    "T_32PFCHAR"      : 0x0510,   # 16:32 pointer to 8 bit signed
+    "T_64PCHAR"       : 0x0610,   # 64 bit pointer to 8 bit signed
 
-    'T_RCHAR'                 : 0x00000070,
-    'T_PRCHAR'                : 0x00000170,
-    'T_PFRCHAR'               : 0x00000270,
-    'T_PHRCHAR'               : 0x00000370,
-    'T_32PRCHAR'              : 0x00000470,
-    'T_32PFRCHAR'             : 0x00000570,
-    'T_64PRCHAR'              : 0x00000670,
+    "T_UCHAR"         : 0x0020,   # 8 bit unsigned
+    "T_PUCHAR"        : 0x0120,   # 16 bit pointer to 8 bit unsigned
+    "T_PFUCHAR"       : 0x0220,   # 16:16 far pointer to 8 bit unsigned
+    "T_PHUCHAR"       : 0x0320,   # 16:16 huge pointer to 8 bit unsigned
+    "T_32PUCHAR"      : 0x0420,   # 32 bit pointer to 8 bit unsigned
+    "T_32PFUCHAR"     : 0x0520,   # 16:32 pointer to 8 bit unsigned
+    "T_64PUCHAR"      : 0x0620,   # 64 bit pointer to 8 bit unsigned
 
-    'T_WCHAR'                 : 0x00000071,
-    'T_PWCHAR'                : 0x00000171,
-    'T_PFWCHAR'               : 0x00000271,
-    'T_PHWCHAR'               : 0x00000371,
-    'T_32PWCHAR'              : 0x00000471,
-    'T_32PFWCHAR'             : 0x00000571,
-    'T_64PWCHAR'              : 0x00000671,
 
-    'T_INT1'                  : 0x00000068,
-    'T_PINT1'                 : 0x00000168,
-    'T_PFINT1'                : 0x00000268,
-    'T_PHINT1'                : 0x00000368,
-    'T_32PINT1'               : 0x00000468,
-    'T_32PFINT1'              : 0x00000568,
-    'T_64PINT1'               : 0x00000668,
+#      really a character types
 
-    'T_UINT1'                 : 0x00000069,
-    'T_PUINT1'                : 0x00000169,
-    'T_PFUINT1'               : 0x00000269,
-    'T_PHUINT1'               : 0x00000369,
-    'T_32PUINT1'              : 0x00000469,
-    'T_32PFUINT1'             : 0x00000569,
-    'T_64PUINT1'              : 0x00000669,
+    "T_RCHAR"         : 0x0070,   # really a char
+    "T_PRCHAR"        : 0x0170,   # 16 bit pointer to a real char
+    "T_PFRCHAR"       : 0x0270,   # 16:16 far pointer to a real char
+    "T_PHRCHAR"       : 0x0370,   # 16:16 huge pointer to a real char
+    "T_32PRCHAR"      : 0x0470,   # 32 bit pointer to a real char
+    "T_32PFRCHAR"     : 0x0570,   # 16:32 pointer to a real char
+    "T_64PRCHAR"      : 0x0670,   # 64 bit pointer to a real char
 
-    'T_SHORT'                 : 0x00000011,
-    'T_PSHORT'                : 0x00000111,
-    'T_PFSHORT'               : 0x00000211,
-    'T_PHSHORT'               : 0x00000311,
-    'T_32PSHORT'              : 0x00000411,
-    'T_32PFSHORT'             : 0x00000511,
-    'T_64PSHORT'              : 0x00000611,
 
-    'T_USHORT'                : 0x00000021,
-    'T_PUSHORT'               : 0x00000121,
-    'T_PFUSHORT'              : 0x00000221,
-    'T_PHUSHORT'              : 0x00000321,
-    'T_32PUSHORT'             : 0x00000421,
-    'T_32PFUSHORT'            : 0x00000521,
-    'T_64PUSHORT'             : 0x00000621,
+#      really a wide character types
 
-    'T_INT2'                  : 0x00000072,
-    'T_PINT2'                 : 0x00000172,
-    'T_PFINT2'                : 0x00000272,
-    'T_PHINT2'                : 0x00000372,
-    'T_32PINT2'               : 0x00000472,
-    'T_32PFINT2'              : 0x00000572,
-    'T_64PINT2'               : 0x00000672,
+    "T_WCHAR"         : 0x0071,   # wide char
+    "T_PWCHAR"        : 0x0171,   # 16 bit pointer to a wide char
+    "T_PFWCHAR"       : 0x0271,   # 16:16 far pointer to a wide char
+    "T_PHWCHAR"       : 0x0371,   # 16:16 huge pointer to a wide char
+    "T_32PWCHAR"      : 0x0471,   # 32 bit pointer to a wide char
+    "T_32PFWCHAR"     : 0x0571,   # 16:32 pointer to a wide char
+    "T_64PWCHAR"      : 0x0671,   # 64 bit pointer to a wide char
 
-    'T_UINT2'                 : 0x00000073,
-    'T_PUINT2'                : 0x00000173,
-    'T_PFUINT2'               : 0x00000273,
-    'T_PHUINT2'               : 0x00000373,
-    'T_32PUINT2'              : 0x00000473,
-    'T_32PFUINT2'             : 0x00000573,
-    'T_64PUINT2'              : 0x00000673,
+#      really a 16-bit unicode char
 
-    'T_LONG'                  : 0x00000012,
-    'T_PLONG'                 : 0x00000112,
-    'T_PFLONG'                : 0x00000212,
-    'T_PHLONG'                : 0x00000312,
-    'T_32PLONG'               : 0x00000412,
-    'T_32PFLONG'              : 0x00000512,
-    'T_64PLONG'               : 0x00000612,
+    "T_CHAR16"         : 0x007a,   # 16-bit unicode char
+    "T_PCHAR16"        : 0x017a,   # 16 bit pointer to a 16-bit unicode char
+    "T_PFCHAR16"       : 0x027a,   # 16:16 far pointer to a 16-bit unicode char
+    "T_PHCHAR16"       : 0x037a,   # 16:16 huge pointer to a 16-bit unicode char
+    "T_32PCHAR16"      : 0x047a,   # 32 bit pointer to a 16-bit unicode char
+    "T_32PFCHAR16"     : 0x057a,   # 16:32 pointer to a 16-bit unicode char
+    "T_64PCHAR16"      : 0x067a,   # 64 bit pointer to a 16-bit unicode char
 
-    'T_ULONG'                 : 0x00000022,
-    'T_PULONG'                : 0x00000122,
-    'T_PFULONG'               : 0x00000222,
-    'T_PHULONG'               : 0x00000322,
-    'T_32PULONG'              : 0x00000422,
-    'T_32PFULONG'             : 0x00000522,
-    'T_64PULONG'              : 0x00000622,
+#      really a 32-bit unicode char
 
-    'T_INT4'                  : 0x00000074,
-    'T_PINT4'                 : 0x00000174,
-    'T_PFINT4'                : 0x00000274,
-    'T_PHINT4'                : 0x00000374,
-    'T_32PINT4'               : 0x00000474,
-    'T_32PFINT4'              : 0x00000574,
-    'T_64PINT4'               : 0x00000674,
+    "T_CHAR32"         : 0x007b,   # 32-bit unicode char
+    "T_PCHAR32"        : 0x017b,   # 16 bit pointer to a 32-bit unicode char
+    "T_PFCHAR32"       : 0x027b,   # 16:16 far pointer to a 32-bit unicode char
+    "T_PHCHAR32"       : 0x037b,   # 16:16 huge pointer to a 32-bit unicode char
+    "T_32PCHAR32"      : 0x047b,   # 32 bit pointer to a 32-bit unicode char
+    "T_32PFCHAR32"     : 0x057b,   # 16:32 pointer to a 32-bit unicode char
+    "T_64PCHAR32"      : 0x067b,   # 64 bit pointer to a 32-bit unicode char
 
-    'T_UINT4'                 : 0x00000075,
-    'T_PUINT4'                : 0x00000175,
-    'T_PFUINT4'               : 0x00000275,
-    'T_PHUINT4'               : 0x00000375,
-    'T_32PUINT4'              : 0x00000475,
-    'T_32PFUINT4'             : 0x00000575,
-    'T_64PUINT4'              : 0x00000675,
+#      8 bit int types
 
-    'T_QUAD'                  : 0x00000013,
-    'T_PQUAD'                 : 0x00000113,
-    'T_PFQUAD'                : 0x00000213,
-    'T_PHQUAD'                : 0x00000313,
-    'T_32PQUAD'               : 0x00000413,
-    'T_32PFQUAD'              : 0x00000513,
-    'T_64PQUAD'               : 0x00000613,
+    "T_INT1"          : 0x0068,   # 8 bit signed int
+    "T_PINT1"         : 0x0168,   # 16 bit pointer to 8 bit signed int
+    "T_PFINT1"        : 0x0268,   # 16:16 far pointer to 8 bit signed int
+    "T_PHINT1"        : 0x0368,   # 16:16 huge pointer to 8 bit signed int
+    "T_32PINT1"       : 0x0468,   # 32 bit pointer to 8 bit signed int
+    "T_32PFINT1"      : 0x0568,   # 16:32 pointer to 8 bit signed int
+    "T_64PINT1"       : 0x0668,   # 64 bit pointer to 8 bit signed int
 
-    'T_UQUAD'                 : 0x00000023,
-    'T_PUQUAD'                : 0x00000123,
-    'T_PFUQUAD'               : 0x00000223,
-    'T_PHUQUAD'               : 0x00000323,
-    'T_32PUQUAD'              : 0x00000423,
-    'T_32PFUQUAD'             : 0x00000523,
-    'T_64PUQUAD'              : 0x00000623,
+    "T_UINT1"         : 0x0069,   # 8 bit unsigned int
+    "T_PUINT1"        : 0x0169,   # 16 bit pointer to 8 bit unsigned int
+    "T_PFUINT1"       : 0x0269,   # 16:16 far pointer to 8 bit unsigned int
+    "T_PHUINT1"       : 0x0369,   # 16:16 huge pointer to 8 bit unsigned int
+    "T_32PUINT1"      : 0x0469,   # 32 bit pointer to 8 bit unsigned int
+    "T_32PFUINT1"     : 0x0569,   # 16:32 pointer to 8 bit unsigned int
+    "T_64PUINT1"      : 0x0669,   # 64 bit pointer to 8 bit unsigned int
 
-    'T_INT8'                  : 0x00000076,
-    'T_PINT8'                 : 0x00000176,
-    'T_PFINT8'                : 0x00000276,
-    'T_PHINT8'                : 0x00000376,
-    'T_32PINT8'               : 0x00000476,
-    'T_32PFINT8'              : 0x00000576,
-    'T_64PINT8'               : 0x00000676,
 
-    'T_UINT8'                 : 0x00000077,
-    'T_PUINT8'                : 0x00000177,
-    'T_PFUINT8'               : 0x00000277,
-    'T_PHUINT8'               : 0x00000377,
-    'T_32PUINT8'              : 0x00000477,
-    'T_32PFUINT8'             : 0x00000577,
-    'T_64PUINT8'              : 0x00000677,
+#      16 bit short types
 
-    'T_OCT'                   : 0x00000014,
-    'T_POCT'                  : 0x00000114,
-    'T_PFOCT'                 : 0x00000214,
-    'T_PHOCT'                 : 0x00000314,
-    'T_32POCT'                : 0x00000414,
-    'T_32PFOCT'               : 0x00000514,
-    'T_64POCT'                : 0x00000614,
+    "T_SHORT"         : 0x0011,   # 16 bit signed
+    "T_PSHORT"        : 0x0111,   # 16 bit pointer to 16 bit signed
+    "T_PFSHORT"       : 0x0211,   # 16:16 far pointer to 16 bit signed
+    "T_PHSHORT"       : 0x0311,   # 16:16 huge pointer to 16 bit signed
+    "T_32PSHORT"      : 0x0411,   # 32 bit pointer to 16 bit signed
+    "T_32PFSHORT"     : 0x0511,   # 16:32 pointer to 16 bit signed
+    "T_64PSHORT"      : 0x0611,   # 64 bit pointer to 16 bit signed
 
-    'T_UOCT'                  : 0x00000024,
-    'T_PUOCT'                 : 0x00000124,
-    'T_PFUOCT'                : 0x00000224,
-    'T_PHUOCT'                : 0x00000324,
-    'T_32PUOCT'               : 0x00000424,
-    'T_32PFUOCT'              : 0x00000524,
-    'T_64PUOCT'               : 0x00000624,
+    "T_USHORT"        : 0x0021,   # 16 bit unsigned
+    "T_PUSHORT"       : 0x0121,   # 16 bit pointer to 16 bit unsigned
+    "T_PFUSHORT"      : 0x0221,   # 16:16 far pointer to 16 bit unsigned
+    "T_PHUSHORT"      : 0x0321,   # 16:16 huge pointer to 16 bit unsigned
+    "T_32PUSHORT"     : 0x0421,   # 32 bit pointer to 16 bit unsigned
+    "T_32PFUSHORT"    : 0x0521,   # 16:32 pointer to 16 bit unsigned
+    "T_64PUSHORT"     : 0x0621,   # 64 bit pointer to 16 bit unsigned
 
-    'T_INT16'                 : 0x00000078,
-    'T_PINT16'                : 0x00000178,
-    'T_PFINT16'               : 0x00000278,
-    'T_PHINT16'               : 0x00000378,
-    'T_32PINT16'              : 0x00000478,
-    'T_32PFINT16'             : 0x00000578,
-    'T_64PINT16'              : 0x00000678,
 
-    'T_UINT16'                : 0x00000079,
-    'T_PUINT16'               : 0x00000179,
-    'T_PFUINT16'              : 0x00000279,
-    'T_PHUINT16'              : 0x00000379,
-    'T_32PUINT16'             : 0x00000479,
-    'T_32PFUINT16'            : 0x00000579,
-    'T_64PUINT16'             : 0x00000679,
+#      16 bit int types
 
-    'T_REAL32'                : 0x00000040,
-    'T_PREAL32'               : 0x00000140,
-    'T_PFREAL32'              : 0x00000240,
-    'T_PHREAL32'              : 0x00000340,
-    'T_32PREAL32'             : 0x00000440,
-    'T_32PFREAL32'            : 0x00000540,
-    'T_64PREAL32'             : 0x00000640,
+    "T_INT2"          : 0x0072,   # 16 bit signed int
+    "T_PINT2"         : 0x0172,   # 16 bit pointer to 16 bit signed int
+    "T_PFINT2"        : 0x0272,   # 16:16 far pointer to 16 bit signed int
+    "T_PHINT2"        : 0x0372,   # 16:16 huge pointer to 16 bit signed int
+    "T_32PINT2"       : 0x0472,   # 32 bit pointer to 16 bit signed int
+    "T_32PFINT2"      : 0x0572,   # 16:32 pointer to 16 bit signed int
+    "T_64PINT2"       : 0x0672,   # 64 bit pointer to 16 bit signed int
 
-    'T_REAL48'                : 0x00000044,
-    'T_PREAL48'               : 0x00000144,
-    'T_PFREAL48'              : 0x00000244,
-    'T_PHREAL48'              : 0x00000344,
-    'T_32PREAL48'             : 0x00000444,
-    'T_32PFREAL48'            : 0x00000544,
-    'T_64PREAL48'             : 0x00000644,
+    "T_UINT2"         : 0x0073,   # 16 bit unsigned int
+    "T_PUINT2"        : 0x0173,   # 16 bit pointer to 16 bit unsigned int
+    "T_PFUINT2"       : 0x0273,   # 16:16 far pointer to 16 bit unsigned int
+    "T_PHUINT2"       : 0x0373,   # 16:16 huge pointer to 16 bit unsigned int
+    "T_32PUINT2"      : 0x0473,   # 32 bit pointer to 16 bit unsigned int
+    "T_32PFUINT2"     : 0x0573,   # 16:32 pointer to 16 bit unsigned int
+    "T_64PUINT2"      : 0x0673,   # 64 bit pointer to 16 bit unsigned int
 
-    'T_REAL64'                : 0x00000041,
-    'T_PREAL64'               : 0x00000141,
-    'T_PFREAL64'              : 0x00000241,
-    'T_PHREAL64'              : 0x00000341,
-    'T_32PREAL64'             : 0x00000441,
-    'T_32PFREAL64'            : 0x00000541,
-    'T_64PREAL64'             : 0x00000641,
 
-    'T_REAL80'                : 0x00000042,
-    'T_PREAL80'               : 0x00000142,
-    'T_PFREAL80'              : 0x00000242,
-    'T_PHREAL80'              : 0x00000342,
-    'T_32PREAL80'             : 0x00000442,
-    'T_32PFREAL80'            : 0x00000542,
-    'T_64PREAL80'             : 0x00000642,
+#      32 bit long types
 
-    'T_REAL128'               : 0x00000043,
-    'T_PREAL128'              : 0x00000143,
-    'T_PFREAL128'             : 0x00000243,
-    'T_PHREAL128'             : 0x00000343,
-    'T_32PREAL128'            : 0x00000443,
-    'T_32PFREAL128'           : 0x00000543,
-    'T_64PREAL128'            : 0x00000643,
+    "T_LONG"          : 0x0012,   # 32 bit signed
+    "T_ULONG"         : 0x0022,   # 32 bit unsigned
+    "T_PLONG"         : 0x0112,   # 16 bit pointer to 32 bit signed
+    "T_PULONG"        : 0x0122,   # 16 bit pointer to 32 bit unsigned
+    "T_PFLONG"        : 0x0212,   # 16:16 far pointer to 32 bit signed
+    "T_PFULONG"       : 0x0222,   # 16:16 far pointer to 32 bit unsigned
+    "T_PHLONG"        : 0x0312,   # 16:16 huge pointer to 32 bit signed
+    "T_PHULONG"       : 0x0322,   # 16:16 huge pointer to 32 bit unsigned
 
-    'T_CPLX32'                : 0x00000050,
-    'T_PCPLX32'               : 0x00000150,
-    'T_PFCPLX32'              : 0x00000250,
-    'T_PHCPLX32'              : 0x00000350,
-    'T_32PCPLX32'             : 0x00000450,
-    'T_32PFCPLX32'            : 0x00000550,
-    'T_64PCPLX32'             : 0x00000650,
+    "T_32PLONG"       : 0x0412,   # 32 bit pointer to 32 bit signed
+    "T_32PULONG"      : 0x0422,   # 32 bit pointer to 32 bit unsigned
+    "T_32PFLONG"      : 0x0512,   # 16:32 pointer to 32 bit signed
+    "T_32PFULONG"     : 0x0522,   # 16:32 pointer to 32 bit unsigned
+    "T_64PLONG"       : 0x0612,   # 64 bit pointer to 32 bit signed
+    "T_64PULONG"      : 0x0622,   # 64 bit pointer to 32 bit unsigned
 
-    'T_CPLX64'                : 0x00000051,
-    'T_PCPLX64'               : 0x00000151,
-    'T_PFCPLX64'              : 0x00000251,
-    'T_PHCPLX64'              : 0x00000351,
-    'T_32PCPLX64'             : 0x00000451,
-    'T_32PFCPLX64'            : 0x00000551,
-    'T_64PCPLX64'             : 0x00000651,
 
-    'T_CPLX80'                : 0x00000052,
-    'T_PCPLX80'               : 0x00000152,
-    'T_PFCPLX80'              : 0x00000252,
-    'T_PHCPLX80'              : 0x00000352,
-    'T_32PCPLX80'             : 0x00000452,
-    'T_32PFCPLX80'            : 0x00000552,
-    'T_64PCPLX80'             : 0x00000652,
+#      32 bit int types
 
-    'T_CPLX128'               : 0x00000053,
-    'T_PCPLX128'              : 0x00000153,
-    'T_PFCPLX128'             : 0x00000253,
-    'T_PHCPLX128'             : 0x00000353,
-    'T_32PCPLX128'            : 0x00000453,
-    'T_32PFCPLX128'           : 0x00000553,
-    'T_64PCPLX128'            : 0x00000653,
+    "T_INT4"          : 0x0074,   # 32 bit signed int
+    "T_PINT4"         : 0x0174,   # 16 bit pointer to 32 bit signed int
+    "T_PFINT4"        : 0x0274,   # 16:16 far pointer to 32 bit signed int
+    "T_PHINT4"        : 0x0374,   # 16:16 huge pointer to 32 bit signed int
+    "T_32PINT4"       : 0x0474,   # 32 bit pointer to 32 bit signed int
+    "T_32PFINT4"      : 0x0574,   # 16:32 pointer to 32 bit signed int
+    "T_64PINT4"       : 0x0674,   # 64 bit pointer to 32 bit signed int
 
-    'T_BOOL08'                : 0x00000030,
-    'T_PBOOL08'               : 0x00000130,
-    'T_PFBOOL08'              : 0x00000230,
-    'T_PHBOOL08'              : 0x00000330,
-    'T_32PBOOL08'             : 0x00000430,
-    'T_32PFBOOL08'            : 0x00000530,
-    'T_64PBOOL08'             : 0x00000630,
+    "T_UINT4"         : 0x0075,   # 32 bit unsigned int
+    "T_PUINT4"        : 0x0175,   # 16 bit pointer to 32 bit unsigned int
+    "T_PFUINT4"       : 0x0275,   # 16:16 far pointer to 32 bit unsigned int
+    "T_PHUINT4"       : 0x0375,   # 16:16 huge pointer to 32 bit unsigned int
+    "T_32PUINT4"      : 0x0475,   # 32 bit pointer to 32 bit unsigned int
+    "T_32PFUINT4"     : 0x0575,   # 16:32 pointer to 32 bit unsigned int
+    "T_64PUINT4"      : 0x0675,   # 64 bit pointer to 32 bit unsigned int
 
-    'T_BOOL16'                : 0x00000031,
-    'T_PBOOL16'               : 0x00000131,
-    'T_PFBOOL16'              : 0x00000231,
-    'T_PHBOOL16'              : 0x00000331,
-    'T_32PBOOL16'             : 0x00000431,
-    'T_32PFBOOL16'            : 0x00000531,
-    'T_64PBOOL16'             : 0x00000631,
 
-    'T_BOOL32'                : 0x00000032,
-    'T_PBOOL32'               : 0x00000132,
-    'T_PFBOOL32'              : 0x00000232,
-    'T_PHBOOL32'              : 0x00000332,
-    'T_32PBOOL32'             : 0x00000432,
-    'T_32PFBOOL32'            : 0x00000532,
-    'T_64PBOOL32'             : 0x00000632,
+#      64 bit quad types
 
-    'T_BOOL64'                : 0x00000033,
-    'T_PBOOL64'               : 0x00000133,
-    'T_PFBOOL64'              : 0x00000233,
-    'T_PHBOOL64'              : 0x00000333,
-    'T_32PBOOL64'             : 0x00000433,
-    'T_32PFBOOL64'            : 0x00000533,
-    'T_64PBOOL64'             : 0x00000633,
+    "T_QUAD"          : 0x0013,   # 64 bit signed
+    "T_PQUAD"         : 0x0113,   # 16 bit pointer to 64 bit signed
+    "T_PFQUAD"        : 0x0213,   # 16:16 far pointer to 64 bit signed
+    "T_PHQUAD"        : 0x0313,   # 16:16 huge pointer to 64 bit signed
+    "T_32PQUAD"       : 0x0413,   # 32 bit pointer to 64 bit signed
+    "T_32PFQUAD"      : 0x0513,   # 16:32 pointer to 64 bit signed
+    "T_64PQUAD"       : 0x0613,   # 64 bit pointer to 64 bit signed
 
-    'T_NCVPTR'                : 0x000001F0,
-    'T_FCVPTR'                : 0x000002F0,
-    'T_HCVPTR'                : 0x000003F0,
-    'T_32NCVPTR'              : 0x000004F0,
-    'T_32FCVPTR'              : 0x000005F0,
-    'T_64NCVPTR'              : 0x000006F0,
+    "T_UQUAD"         : 0x0023,   # 64 bit unsigned
+    "T_PUQUAD"        : 0x0123,   # 16 bit pointer to 64 bit unsigned
+    "T_PFUQUAD"       : 0x0223,   # 16:16 far pointer to 64 bit unsigned
+    "T_PHUQUAD"       : 0x0323,   # 16:16 huge pointer to 64 bit unsigned
+    "T_32PUQUAD"      : 0x0423,   # 32 bit pointer to 64 bit unsigned
+    "T_32PFUQUAD"     : 0x0523,   # 16:32 pointer to 64 bit unsigned
+    "T_64PUQUAD"      : 0x0623,   # 64 bit pointer to 64 bit unsigned
+
+
+#      64 bit int types
+
+    "T_INT8"          : 0x0076,   # 64 bit signed int
+    "T_PINT8"         : 0x0176,   # 16 bit pointer to 64 bit signed int
+    "T_PFINT8"        : 0x0276,   # 16:16 far pointer to 64 bit signed int
+    "T_PHINT8"        : 0x0376,   # 16:16 huge pointer to 64 bit signed int
+    "T_32PINT8"       : 0x0476,   # 32 bit pointer to 64 bit signed int
+    "T_32PFINT8"      : 0x0576,   # 16:32 pointer to 64 bit signed int
+    "T_64PINT8"       : 0x0676,   # 64 bit pointer to 64 bit signed int
+
+    "T_UINT8"         : 0x0077,   # 64 bit unsigned int
+    "T_PUINT8"        : 0x0177,   # 16 bit pointer to 64 bit unsigned int
+    "T_PFUINT8"       : 0x0277,   # 16:16 far pointer to 64 bit unsigned int
+    "T_PHUINT8"       : 0x0377,   # 16:16 huge pointer to 64 bit unsigned int
+    "T_32PUINT8"      : 0x0477,   # 32 bit pointer to 64 bit unsigned int
+    "T_32PFUINT8"     : 0x0577,   # 16:32 pointer to 64 bit unsigned int
+    "T_64PUINT8"      : 0x0677,   # 64 bit pointer to 64 bit unsigned int
+
+
+#      128 bit octet types
+
+    "T_OCT"           : 0x0014,   # 128 bit signed
+    "T_POCT"          : 0x0114,   # 16 bit pointer to 128 bit signed
+    "T_PFOCT"         : 0x0214,   # 16:16 far pointer to 128 bit signed
+    "T_PHOCT"         : 0x0314,   # 16:16 huge pointer to 128 bit signed
+    "T_32POCT"        : 0x0414,   # 32 bit pointer to 128 bit signed
+    "T_32PFOCT"       : 0x0514,   # 16:32 pointer to 128 bit signed
+    "T_64POCT"        : 0x0614,   # 64 bit pointer to 128 bit signed
+
+    "T_UOCT"          : 0x0024,   # 128 bit unsigned
+    "T_PUOCT"         : 0x0124,   # 16 bit pointer to 128 bit unsigned
+    "T_PFUOCT"        : 0x0224,   # 16:16 far pointer to 128 bit unsigned
+    "T_PHUOCT"        : 0x0324,   # 16:16 huge pointer to 128 bit unsigned
+    "T_32PUOCT"       : 0x0424,   # 32 bit pointer to 128 bit unsigned
+    "T_32PFUOCT"      : 0x0524,   # 16:32 pointer to 128 bit unsigned
+    "T_64PUOCT"       : 0x0624,   # 64 bit pointer to 128 bit unsigned
+
+
+#      128 bit int types
+
+    "T_INT16"         : 0x0078,   # 128 bit signed int
+    "T_PINT16"        : 0x0178,   # 16 bit pointer to 128 bit signed int
+    "T_PFINT16"       : 0x0278,   # 16:16 far pointer to 128 bit signed int
+    "T_PHINT16"       : 0x0378,   # 16:16 huge pointer to 128 bit signed int
+    "T_32PINT16"      : 0x0478,   # 32 bit pointer to 128 bit signed int
+    "T_32PFINT16"     : 0x0578,   # 16:32 pointer to 128 bit signed int
+    "T_64PINT16"      : 0x0678,   # 64 bit pointer to 128 bit signed int
+
+    "T_UINT16"        : 0x0079,   # 128 bit unsigned int
+    "T_PUINT16"       : 0x0179,   # 16 bit pointer to 128 bit unsigned int
+    "T_PFUINT16"      : 0x0279,   # 16:16 far pointer to 128 bit unsigned int
+    "T_PHUINT16"      : 0x0379,   # 16:16 huge pointer to 128 bit unsigned int
+    "T_32PUINT16"     : 0x0479,   # 32 bit pointer to 128 bit unsigned int
+    "T_32PFUINT16"    : 0x0579,   # 16:32 pointer to 128 bit unsigned int
+    "T_64PUINT16"     : 0x0679,   # 64 bit pointer to 128 bit unsigned int
+
+
+#      16 bit real types
+
+    "T_REAL16"        : 0x0046,   # 16 bit real
+    "T_PREAL16"       : 0x0146,   # 16 bit pointer to 16 bit real
+    "T_PFREAL16"      : 0x0246,   # 16:16 far pointer to 16 bit real
+    "T_PHREAL16"      : 0x0346,   # 16:16 huge pointer to 16 bit real
+    "T_32PREAL16"     : 0x0446,   # 32 bit pointer to 16 bit real
+    "T_32PFREAL16"    : 0x0546,   # 16:32 pointer to 16 bit real
+    "T_64PREAL16"     : 0x0646,   # 64 bit pointer to 16 bit real
+
+
+#      32 bit real types
+
+    "T_REAL32"        : 0x0040,   # 32 bit real
+    "T_PREAL32"       : 0x0140,   # 16 bit pointer to 32 bit real
+    "T_PFREAL32"      : 0x0240,   # 16:16 far pointer to 32 bit real
+    "T_PHREAL32"      : 0x0340,   # 16:16 huge pointer to 32 bit real
+    "T_32PREAL32"     : 0x0440,   # 32 bit pointer to 32 bit real
+    "T_32PFREAL32"    : 0x0540,   # 16:32 pointer to 32 bit real
+    "T_64PREAL32"     : 0x0640,   # 64 bit pointer to 32 bit real
+
+
+#      32 bit partial-precision real types
+
+    "T_REAL32PP"      : 0x0045,   # 32 bit PP real
+    "T_PREAL32PP"     : 0x0145,   # 16 bit pointer to 32 bit PP real
+    "T_PFREAL32PP"    : 0x0245,   # 16:16 far pointer to 32 bit PP real
+    "T_PHREAL32PP"    : 0x0345,   # 16:16 huge pointer to 32 bit PP real
+    "T_32PREAL32PP"   : 0x0445,   # 32 bit pointer to 32 bit PP real
+    "T_32PFREAL32PP"  : 0x0545,   # 16:32 pointer to 32 bit PP real
+    "T_64PREAL32PP"   : 0x0645,   # 64 bit pointer to 32 bit PP real
+
+
+#      48 bit real types
+
+    "T_REAL48"        : 0x0044,   # 48 bit real
+    "T_PREAL48"       : 0x0144,   # 16 bit pointer to 48 bit real
+    "T_PFREAL48"      : 0x0244,   # 16:16 far pointer to 48 bit real
+    "T_PHREAL48"      : 0x0344,   # 16:16 huge pointer to 48 bit real
+    "T_32PREAL48"     : 0x0444,   # 32 bit pointer to 48 bit real
+    "T_32PFREAL48"    : 0x0544,   # 16:32 pointer to 48 bit real
+    "T_64PREAL48"     : 0x0644,   # 64 bit pointer to 48 bit real
+
+
+#      64 bit real types
+
+    "T_REAL64"        : 0x0041,   # 64 bit real
+    "T_PREAL64"       : 0x0141,   # 16 bit pointer to 64 bit real
+    "T_PFREAL64"      : 0x0241,   # 16:16 far pointer to 64 bit real
+    "T_PHREAL64"      : 0x0341,   # 16:16 huge pointer to 64 bit real
+    "T_32PREAL64"     : 0x0441,   # 32 bit pointer to 64 bit real
+    "T_32PFREAL64"    : 0x0541,   # 16:32 pointer to 64 bit real
+    "T_64PREAL64"     : 0x0641,   # 64 bit pointer to 64 bit real
+
+
+#      80 bit real types
+
+    "T_REAL80"        : 0x0042,   # 80 bit real
+    "T_PREAL80"       : 0x0142,   # 16 bit pointer to 80 bit real
+    "T_PFREAL80"      : 0x0242,   # 16:16 far pointer to 80 bit real
+    "T_PHREAL80"      : 0x0342,   # 16:16 huge pointer to 80 bit real
+    "T_32PREAL80"     : 0x0442,   # 32 bit pointer to 80 bit real
+    "T_32PFREAL80"    : 0x0542,   # 16:32 pointer to 80 bit real
+    "T_64PREAL80"     : 0x0642,   # 64 bit pointer to 80 bit real
+
+
+#      128 bit real types
+
+    "T_REAL128"       : 0x0043,   # 128 bit real
+    "T_PREAL128"      : 0x0143,   # 16 bit pointer to 128 bit real
+    "T_PFREAL128"     : 0x0243,   # 16:16 far pointer to 128 bit real
+    "T_PHREAL128"     : 0x0343,   # 16:16 huge pointer to 128 bit real
+    "T_32PREAL128"    : 0x0443,   # 32 bit pointer to 128 bit real
+    "T_32PFREAL128"   : 0x0543,   # 16:32 pointer to 128 bit real
+    "T_64PREAL128"    : 0x0643,   # 64 bit pointer to 128 bit real
+
+
+#      32 bit complex types
+
+    "T_CPLX32"        : 0x0050,   # 32 bit complex
+    "T_PCPLX32"       : 0x0150,   # 16 bit pointer to 32 bit complex
+    "T_PFCPLX32"      : 0x0250,   # 16:16 far pointer to 32 bit complex
+    "T_PHCPLX32"      : 0x0350,   # 16:16 huge pointer to 32 bit complex
+    "T_32PCPLX32"     : 0x0450,   # 32 bit pointer to 32 bit complex
+    "T_32PFCPLX32"    : 0x0550,   # 16:32 pointer to 32 bit complex
+    "T_64PCPLX32"     : 0x0650,   # 64 bit pointer to 32 bit complex
+
+
+#      64 bit complex types
+
+    "T_CPLX64"        : 0x0051,   # 64 bit complex
+    "T_PCPLX64"       : 0x0151,   # 16 bit pointer to 64 bit complex
+    "T_PFCPLX64"      : 0x0251,   # 16:16 far pointer to 64 bit complex
+    "T_PHCPLX64"      : 0x0351,   # 16:16 huge pointer to 64 bit complex
+    "T_32PCPLX64"     : 0x0451,   # 32 bit pointer to 64 bit complex
+    "T_32PFCPLX64"    : 0x0551,   # 16:32 pointer to 64 bit complex
+    "T_64PCPLX64"     : 0x0651,   # 64 bit pointer to 64 bit complex
+
+
+#      80 bit complex types
+
+    "T_CPLX80"        : 0x0052,   # 80 bit complex
+    "T_PCPLX80"       : 0x0152,   # 16 bit pointer to 80 bit complex
+    "T_PFCPLX80"      : 0x0252,   # 16:16 far pointer to 80 bit complex
+    "T_PHCPLX80"      : 0x0352,   # 16:16 huge pointer to 80 bit complex
+    "T_32PCPLX80"     : 0x0452,   # 32 bit pointer to 80 bit complex
+    "T_32PFCPLX80"    : 0x0552,   # 16:32 pointer to 80 bit complex
+    "T_64PCPLX80"     : 0x0652,   # 64 bit pointer to 80 bit complex
+
+
+#      128 bit complex types
+
+    "T_CPLX128"       : 0x0053,   # 128 bit complex
+    "T_PCPLX128"      : 0x0153,   # 16 bit pointer to 128 bit complex
+    "T_PFCPLX128"     : 0x0253,   # 16:16 far pointer to 128 bit complex
+    "T_PHCPLX128"     : 0x0353,   # 16:16 huge pointer to 128 bit real
+    "T_32PCPLX128"    : 0x0453,   # 32 bit pointer to 128 bit complex
+    "T_32PFCPLX128"   : 0x0553,   # 16:32 pointer to 128 bit complex
+    "T_64PCPLX128"    : 0x0653,   # 64 bit pointer to 128 bit complex
+
+
+#      boolean types
+
+    "T_BOOL08"        : 0x0030,   # 8 bit boolean
+    "T_PBOOL08"       : 0x0130,   # 16 bit pointer to  8 bit boolean
+    "T_PFBOOL08"      : 0x0230,   # 16:16 far pointer to  8 bit boolean
+    "T_PHBOOL08"      : 0x0330,   # 16:16 huge pointer to  8 bit boolean
+    "T_32PBOOL08"     : 0x0430,   # 32 bit pointer to 8 bit boolean
+    "T_32PFBOOL08"    : 0x0530,   # 16:32 pointer to 8 bit boolean
+    "T_64PBOOL08"     : 0x0630,   # 64 bit pointer to 8 bit boolean
+
+    "T_BOOL16"        : 0x0031,   # 16 bit boolean
+    "T_PBOOL16"       : 0x0131,   # 16 bit pointer to 16 bit boolean
+    "T_PFBOOL16"      : 0x0231,   # 16:16 far pointer to 16 bit boolean
+    "T_PHBOOL16"      : 0x0331,   # 16:16 huge pointer to 16 bit boolean
+    "T_32PBOOL16"     : 0x0431,   # 32 bit pointer to 18 bit boolean
+    "T_32PFBOOL16"    : 0x0531,   # 16:32 pointer to 16 bit boolean
+    "T_64PBOOL16"     : 0x0631,   # 64 bit pointer to 18 bit boolean
+
+    "T_BOOL32"        : 0x0032,   # 32 bit boolean
+    "T_PBOOL32"       : 0x0132,   # 16 bit pointer to 32 bit boolean
+    "T_PFBOOL32"      : 0x0232,   # 16:16 far pointer to 32 bit boolean
+    "T_PHBOOL32"      : 0x0332,   # 16:16 huge pointer to 32 bit boolean
+    "T_32PBOOL32"     : 0x0432,   # 32 bit pointer to 32 bit boolean
+    "T_32PFBOOL32"    : 0x0532,   # 16:32 pointer to 32 bit boolean
+    "T_64PBOOL32"     : 0x0632,   # 64 bit pointer to 32 bit boolean
+
+    "T_BOOL64"        : 0x0033,   # 64 bit boolean
+    "T_PBOOL64"       : 0x0133,   # 16 bit pointer to 64 bit boolean
+    "T_PFBOOL64"      : 0x0233,   # 16:16 far pointer to 64 bit boolean
+    "T_PHBOOL64"      : 0x0333,   # 16:16 huge pointer to 64 bit boolean
+    "T_32PBOOL64"     : 0x0433,   # 32 bit pointer to 64 bit boolean
+    "T_32PFBOOL64"    : 0x0533,   # 16:32 pointer to 64 bit boolean
+    "T_64PBOOL64"     : 0x0633,   # 64 bit pointer to 64 bit boolean
+
+
+#      ???
+
+    "T_NCVPTR"        : 0x01f0,   # CV Internal type for created near pointers
+    "T_FCVPTR"        : 0x02f0,   # CV Internal type for created far pointers
+    "T_HCVPTR"        : 0x03f0,   # CV Internal type for created huge pointers
+    "T_32NCVPTR"      : 0x04f0,   # CV Internal type for created near 32-bit pointers
+    "T_32FCVPTR"      : 0x05f0,   # CV Internal type for created far 32-bit pointers
+    "T_64NCVPTR" : 0x06f0, # CV Internal type for created near 64-bit pointers
 }
 
 base_type = Enum(ULInt16("base_type"), **base_types)
