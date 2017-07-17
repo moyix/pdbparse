@@ -56,9 +56,17 @@ def get_debug_data(pe, type=DEBUG_TYPE[u'IMAGE_DEBUG_TYPE_CODEVIEW']):
     return retval
 
 def get_dbg_fname(dbgdata):
+    """
+        Parse the MSIC header using construct.
+        Parameter:
+            * (bytes) dbgdata, the raw bytes header 
+        Return :
+            * (str) the .dbg filename
+    """
     from pdbparse.dbgold import IMAGE_DEBUG_MISC
     dbgstruct = IMAGE_DEBUG_MISC.parse(dbgdata)
-    return ntpath.basename(dbgstruct.Strings[0])
+    raw_filename = dbgstruct.Strings[0].decode('ascii')
+    return ntpath.basename(raw_filename)
 
 def get_rsds(dbgdata):
     """

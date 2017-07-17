@@ -132,12 +132,12 @@ def handle_pe(pe_file):
             saved_file = saved_file.replace('.db_','.dbg')
 
         from pdbparse.dbgold import DbgFile
-        dbgfile = DbgFile.parse_stream(open(saved_file))
+        dbgfile = DbgFile.parse_stream(open(saved_file, 'rb'))
         cv_entry = [ d for d in dbgfile.IMAGE_DEBUG_DIRECTORY
                        if d.Type == "IMAGE_DEBUG_TYPE_CODEVIEW"][0]
-        if cv_entry.Data[:4] == "NB09":
+        if cv_entry.Data[:4] == b"NB09":
             return
-        elif cv_entry.Data[:4] == "NB10":
+        elif cv_entry.Data[:4] == b"NB10":
             (guid,filename) = get_nb10(cv_entry.Data)
             
             guid = guid.upper()

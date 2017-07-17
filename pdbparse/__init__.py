@@ -354,15 +354,17 @@ class PDB:
     def read(self, pages, size=-1):
         """Read a portion of this PDB file, given a list of pages.
         
-        pages: a list of page numbers that make up the data requested
-        size: the number of bytes requested. Must be <= len(pages)*self.page_size
-        
+        Parameters :
+            * (list) pages: a list of page numbers that make up the data requested
+            * (int) size: the number of bytes requested. Must be <= len(pages)*self.page_size
+        Return :
+            * (bytes) the data read
         """
         
         assert size <= len(pages)*self.page_size
 
         pos = self.fp.tell()
-        s = ''
+        s = b''
         for pn in pages:
            self.fp.seek(pn*self.page_size)
            s += self.fp.read(self.page_size)
