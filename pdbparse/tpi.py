@@ -618,7 +618,7 @@ def val(name):
         ),
     )
 
-PadAlign = If(lambda ctx: ctx._pad > 0xF0,
+PadAlign = If(lambda ctx: ctx._pad != None and ctx._pad > 0xF0,
     Optional(Padding(lambda ctx: ctx._pad & 0x0F))
 )
 
