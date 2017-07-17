@@ -202,7 +202,8 @@ class PDB2RootStream(PDBStream):
             else:
                 page_lists.append(())
         
-        self.streams = zip(sizes, page_lists)
+        # use list() to make it compatible with python 3
+        self.streams = list(zip(sizes, page_lists))
 
 class PDBInfoStream(ParsedPDBStream):
     def load(self):
