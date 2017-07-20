@@ -9,7 +9,10 @@ setup(name='pdbparse',
       author_email='brendandg@gatech.edu',
       url='http://pdbparse.googlecode.com/',
       packages=['pdbparse'],
-      requires=['construct', 'pefile'],
+      install_requires = [
+        'construct<=2.5.2', # last known release from https://github.com/tomerfiliba
+        'pefile'
+      ],
       classifiers=[
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Operating System :: OS Independent',
