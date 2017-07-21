@@ -107,14 +107,14 @@ if __name__ == "__main__":
             if len(repr(test)) > 50:
                 test = test[:50] + "[...]"
             if not should_succeed:
-                print 'Test %-60s FAILED.' % repr(test)
+                print ('Test %-60s FAILED.' % repr(test))
             else:
-                print 'Test %-60s PASSED.' % repr(test)
+                print ('Test %-60s PASSED.' % repr(test))
         except ValueError:
             if should_succeed:
-                print 'Test %-60s FAILED.' % repr(test)
+                print ('Test %-60s FAILED.' % repr(test))
             else:
-                print 'Test %-60s PASSED.' % repr(test)
+                print ('Test %-60s PASSED.' % repr(test))
     
     validate_data_1 = {}
     validate_data_1["$T0"]  = 0xbfff0012;
@@ -181,14 +181,14 @@ if __name__ == "__main__":
             if len(repr(test)) > 50:
                 test = test[:50] + "[...]"
             if not should_succeed:
-                print 'Test %-60s FAILED.' % repr(test)
+                print ('Test %-60s FAILED.' % repr(test))
             else:
-                print 'Test %-60s PASSED.' % repr(test)
+                print ('Test %-60s PASSED.' % repr(test))
         except ValueError:
             if should_succeed:
-                print 'Test %-60s FAILED.' % repr(test)
+                print ('Test %-60s FAILED.' % repr(test))
             else:
-                print 'Test %-60s PASSED.' % repr(test)
+                print ('Test %-60s PASSED.' % repr(test))
 
     for k in validate_data_0:
         assert vars[k] == validate_data_0[k]

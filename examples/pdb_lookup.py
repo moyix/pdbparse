@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+from __future__ import print_function
 import sys, os
 
 from pdbparse.symlookup import Lookup
@@ -13,7 +13,7 @@ if __name__ == "__main__":
         ipy = False
 
     if len(sys.argv) < 3 or len(sys.argv[1:]) % 2 != 0:
-        print >> sys.stderr, "usage: %s <pdb> <base> [[<pdb> <base>] ...]" % sys.argv[0]
+        print ("usage: %s <pdb> <base> [[<pdb> <base>] ...]" % sys.argv[0], file=sys.stderr)
         sys.exit(1)
 
     mods = [ (sys.argv[i],int(sys.argv[i+1],0)) for i in range(1,len(sys.argv)-1,2) ]

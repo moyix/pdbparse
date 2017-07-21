@@ -19,11 +19,11 @@ class Lookup(object):
         for pdbname,base in mods:
             pdbbase = ".".join(os.path.basename(pdbname).split('.')[:-1])
             if not os.path.exists(pdbname):
-                print "WARN: %s not found" % pdbname
+                print ("WARN: %s not found" % pdbname)
                 not_found.append( (base, pdbbase) )
                 continue
 
-            #print "Loading symbols for %s..." % pdbbase
+            #print ("Loading symbols for %s..." % pdbbase)
             try:
                 # Do this the hard way to avoid having to load
                 # the types stream in mammoth PDB files
@@ -41,10 +41,10 @@ class Lookup(object):
                 pdb.STREAM_SECT_HDR_ORIG = pdb.STREAM_SECT_HDR_ORIG.reload()
                 pdb.STREAM_SECT_HDR_ORIG.load()
 
-            except AttributeError, e:
+            except AttributeError as e:
                 pass
-            #except Exception, e:
-            #    print "WARN: error %s parsing %s, skipping" % (e,pdbbase)
+            #except Exception as e:
+            #    print ("WARN: error %s parsing %s, skipping" % (e,pdbbase))
             #    not_found.append( (base, pdbbase) )
             #    continue
 

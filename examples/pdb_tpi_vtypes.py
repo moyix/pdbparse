@@ -134,13 +134,13 @@ def member_str(m):
         return "[UNIMPLEMENTED %s]" % m.leaf_type
 
 def print_vtype(lf):
-    print "  '%s' : [ %#x, {" % (lf.name, lf.size)
+    print ("  '%s' : [ %#x, {" % (lf.name, lf.size))
     for s in lf.fieldlist.substructs:
         try:
-            print "    '%s' : [ %#x, %s]," % (s.name, s.offset, member_str(s.index))
-        except AttributeError,e:
-            print "    # Missing member of type %s" % s.leaf_type
-    print "} ],"
+            print ("    '%s' : [ %#x, %s]," % (s.name, s.offset, member_str(s.index)))
+        except AttributeError as e:
+            print ("    # Missing member of type %s" % s.leaf_type)
+    print ("} ],")
 
 
 from optparse import OptionParser
@@ -184,12 +184,12 @@ else:
                 if not pdb.STREAM_TPI.structures[t].prop.fwdref ]
 
 if opts.name:
-    print "%s = {" % opts.name
+    print ("%s = {" % opts.name)
 else:
-    print "%s_types = {" % basename(args[0]).split(".")[0]
+    print ("%s_types = {" % basename(args[0]).split(".")[0])
 for s in structs:
     print_vtype(s)
 if opts.include:
     sys.stdout.write(open(opts.include).read())
-print "}"
+print ("}")
 

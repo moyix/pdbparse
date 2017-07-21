@@ -106,7 +106,7 @@ class PDBStream:
         """Convenience method. Reloads a PDBStream. May return a more specialized type."""
         try:
             pdb_cls = self.parent._stream_map[self.index]
-        except (KeyError,AttributeError):
+        except (KeyError,AttributeError) as e:
             pdb_cls = PDBStream
         return pdb_cls(self.fp, self.pages, self.index, size=self.size,
                 page_size=self.page_size, fast_load=self.fast_load,
@@ -202,7 +202,8 @@ class PDB2RootStream(PDBStream):
             else:
                 page_lists.append(())
         
-        self.streams = zip(sizes, page_lists)
+        # use list() to make it compatible with python 3
+        self.streams = list(zip(sizes, page_lists))
 
 class PDBInfoStream(ParsedPDBStream):
     def load(self):
@@ -313,7 +314,7 @@ class PDBGlobalSymbolStream(ParsedPDBStream):
         for g in self.globals:
             if not hasattr(g, 'symtype'): continue
             if g.symtype == 0:
-                if g.name.startswith("_"):
+                if g.name.startswith(b"_"):
                     self.vars[g.name[1:]] = g
                 else:
                     self.vars[g.name] = g
@@ -354,15 +355,17 @@ class PDB:
     def read(self, pages, size=-1):
         """Read a portion of this PDB file, given a list of pages.
         
-        pages: a list of page numbers that make up the data requested
-        size: the number of bytes requested. Must be <= len(pages)*self.page_size
-        
+        Parameters :
+            * (list) pages: a list of page numbers that make up the data requested
+            * (int) size: the number of bytes requested. Must be <= len(pages)*self.page_size
+        Return :
+            * (bytes) the data read
         """
         
         assert size <= len(pages)*self.page_size
 
         pos = self.fp.tell()
-        s = ''
+        s = b''
         for pn in pages:
            self.fp.seek(pn*self.page_size)
            s += self.fp.read(self.page_size)

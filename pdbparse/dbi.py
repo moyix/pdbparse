@@ -1,5 +1,11 @@
 #!/usr/bin/env python
 
+# Python 2 and 3
+from io import BytesIO
+
+# Python 2 and 3: forward-compatible
+from builtins import range 
+
 from construct import *
 
 _ALIGN = 4
@@ -21,7 +27,7 @@ def SymbolRange(name):
     )
 
 DBIHeader = Struct("DBIHeader",
-    Const(Bytes("magic", 4), "\xFF\xFF\xFF\xFF"),                           # 0
+    Const(Bytes("magic", 4), b"\xFF\xFF\xFF\xFF"),                          # 0
     ULInt32("version"),                                                     # 4
     ULInt32("age"),                                                         # 8
     SLInt16("gssymStream"),                                                 # 12
@@ -143,9 +149,9 @@ def parse_stream(stream):
     modules = [] # array of arrays of files
     files = [] # array of files (non unique)
     Names = stream.read(end - stream.tell())
-    for i in xrange(0, fileIndex.cMod):
+    for i in range(0, fileIndex.cMod):
         these = []
-        for j in xrange(modStart[i], modStart[i]+cRefCnt[i]):
+        for j in range(modStart[i], modStart[i]+cRefCnt[i]):
             Name = CString("Name").parse(Names[NameRef[j]:])
             files.append(Name)
             these.append(Name)
@@ -166,4 +172,4 @@ def parse_stream(stream):
                      files=files)
 
 def parse(data):
-    return parse_stream(StringIO(data))
+    return parse_stream(BytesIO(data))

@@ -28,13 +28,22 @@ You can see an explanation of the URL format at:
 http://jimmers.info/pdb.html
 '''
 
-import urllib2
 import sys,os
 import os.path
 from pefile import PE
 from shutil import copyfileobj
-from urllib import FancyURLopener
+
 from pdbparse.peinfo import *
+
+try:
+    from urllib.parse import urlparse, urlencode
+    from urllib.request import urlopen, Request, build_opener, FancyURLopener
+    from urllib.error import HTTPError
+except ImportError:
+    from urlparse import urlparse
+    from urllib import urlencode
+    from urllib2 import urlopen, Request, HTTPError, build_opener
+    from urllib import FancyURLopener
 
 #SYM_URL = 'http://symbols.mozilla.org/firefox'
 SYM_URLS = ['http://msdl.microsoft.com/download/symbols']
@@ -44,7 +53,7 @@ class PDBOpener(FancyURLopener):
     version = USER_AGENT
     def http_error_default(self, url, fp, errcode, errmsg, headers):
         if errcode == 404:
-            raise urllib2.HTTPError(url, errcode, errmsg, headers, fp)
+            raise HTTPError(url, errcode, errmsg, headers, fp)
         else:
             FancyURLopener.http_error_default(url, fp, errcode, errmsg, headers)
 
@@ -52,9 +61,9 @@ lastprog = None
 def progress(blocks,blocksz,totalsz):
     global lastprog
     if lastprog is None:
-        print "Connected. Downloading data..."
+        print ("Connected. Downloading data...")
     percent = int((100*(blocks*blocksz)/float(totalsz)))
-    if lastprog != percent and percent % 5 == 0: print "%d%%" % percent,
+    if lastprog != percent and percent % 5 == 0: print ("%d%%" % percent)
     lastprog = percent
     sys.stdout.flush()
 
@@ -71,40 +80,40 @@ def download_file(guid,fname,path="",quiet=False):
     # Exception: old-style PEs without a debug section use 
     # TimeDateStamp+SizeOfImage
     if len(guid) == 32:
-        print "Warning: GUID is too short to be valid. Did you append the Age field?"
+        print ("Warning: GUID is too short to be valid. Did you append the Age field?")
 
     for sym_url in SYM_URLS:
         url = sym_url + "/%s/%s/" % (fname,guid)
-        opener = urllib2.build_opener()
+        opener = build_opener()
         
         # Whatever extension the user has supplied it must be replaced with .pd_
         tries = [ fname[:-1] + '_', fname ]
 
         for t in tries:
-            if not quiet: print "Trying %s" % (url+t)
+            if not quiet: print ("Trying %s" % (url+t))
             outfile = os.path.join(path,t)
             try:
                 hook = None if quiet else progress
                 PDBOpener().retrieve(url+t, outfile, reporthook=hook)
                 if not quiet:
-                    print
-                    print "Saved symbols to %s" % (outfile)
+                    print ()
+                    print ("Saved symbols to %s" % (outfile))
                 return outfile
-            except urllib2.HTTPError, e:
+            except HTTPError as e:
                 if not quiet:
-                    print "HTTP error %u" % (e.code)
+                    print ("HTTP error %u" % (e.code))
     return None
 
 def handle_pe(pe_file):
     dbgdata, tp = get_pe_debug_data(pe_file)
     if tp == "IMAGE_DEBUG_TYPE_CODEVIEW":
         # XP+
-        if dbgdata[:4] == "RSDS":
+        if dbgdata[:4] == b"RSDS":
             (guid,filename) = get_rsds(dbgdata)
-        elif dbgdata[:4] == "NB10":
+        elif dbgdata[:4] == b"NB10":
             (guid,filename) = get_nb10(dbgdata)
         else:
-            print "ERR: CodeView section not NB10 or RSDS"
+            print ("ERR: CodeView section not NB10 or RSDS")
             return
         guid = guid.upper()
         saved_file = download_file(guid,filename)
@@ -123,24 +132,24 @@ def handle_pe(pe_file):
             saved_file = saved_file.replace('.db_','.dbg')
 
         from pdbparse.dbgold import DbgFile
-        dbgfile = DbgFile.parse_stream(open(saved_file))
+        dbgfile = DbgFile.parse_stream(open(saved_file, 'rb'))
         cv_entry = [ d for d in dbgfile.IMAGE_DEBUG_DIRECTORY
                        if d.Type == "IMAGE_DEBUG_TYPE_CODEVIEW"][0]
-        if cv_entry.Data[:4] == "NB09":
+        if cv_entry.Data[:4] == b"NB09":
             return
-        elif cv_entry.Data[:4] == "NB10":
+        elif cv_entry.Data[:4] == b"NB10":
             (guid,filename) = get_nb10(cv_entry.Data)
             
             guid = guid.upper()
             saved_file = download_file(guid,filename)
         else:
-            print "WARN: DBG file received from symbol server has unknown CodeView section"
+            print ("WARN: DBG file received from symbol server has unknown CodeView section")
             return
     else:
-        print "Unknown type:",tp
+        print ("Unknown type:",tp)
         return
 
-    if saved_file.endswith("_"):
+    if saved_file != None and saved_file.endswith("_"):
         os.system("cabextract %s" % saved_file)
 
 def get_pe_from_pe(filename, symname=None):

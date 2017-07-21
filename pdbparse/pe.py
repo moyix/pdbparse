@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from pdbparse.info import GUID
 from construct import *
 
 IMAGE_SECTION_HEADER = Struct("IMAGE_SECTION_HEADER",

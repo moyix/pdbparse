@@ -76,8 +76,8 @@ def print_closure(s, nodes=False, comments=False):
         return
 
     if nodes:
-        print '    %s_%d [label="{ %s | Index: %d \\n Size: %d \\n Members: %d }", shape=record];' % (s.name, s.tpi_idx,
-            s.name, s.tpi_idx, s.size, s.count)
+        print ('    %s_%d [label="{ %s | Index: %d \\n Size: %d \\n Members: %d }", shape=record];' % (s.name, s.tpi_idx,
+            s.name, s.tpi_idx, s.size, s.count))
 
     for u in s.fieldlist.substructs:
         if u.leaf_type == "LF_MEMBER":
@@ -86,19 +86,19 @@ def print_closure(s, nodes=False, comments=False):
                 if u.index.name == '_LIST_ENTRY' and (s.name,u.name) in lists:
                     list_element_type = structs[lists[(s.name,u.name)]]
                     if nodes:
-                        print '    %s_%d -> %s_%d [style=dashed,color=forestgreen]; %s' % (s.name, s.tpi_idx, list_element_type.name, list_element_type.tpi_idx,
-                                                                      "//" + u.name if comments else "")
+                        print ('    %s_%d -> %s_%d [style=dashed,color=forestgreen]; %s' % (s.name, s.tpi_idx, list_element_type.name, list_element_type.tpi_idx,
+                                                                      "//" + u.name if comments else ""))
                     else:
-                        print '    %s -> %s [style=dashed,color=forestgreen]; %s' % (s.name, list_element_type.name,
-                                                                   "//" + u.name if comments else "")
+                        print ('    %s -> %s [style=dashed,color=forestgreen]; %s' % (s.name, list_element_type.name,
+                                                                   "//" + u.name if comments else ""))
                     next_type = list_element_type
                 else:
                     if nodes:
-                        print '    %s_%d -> %s_%d [color=blue]; %s' % (s.name, s.tpi_idx, u.index.name, u.index.tpi_idx,
-                                                          "//" + u.name if comments else "")
+                        print ('    %s_%d -> %s_%d [color=blue]; %s' % (s.name, s.tpi_idx, u.index.name, u.index.tpi_idx,
+                                                          "//" + u.name if comments else ""))
                     else:
-                        print '    %s -> %s [color=blue]; %s' % (s.name, u.index.name,
-                                                    "//" + u.name if comments else "")
+                        print ('    %s -> %s [color=blue]; %s' % (s.name, u.index.name,
+                                                    "//" + u.name if comments else ""))
                     next_type = u.index
 
                 if not next_type in traversed:
@@ -107,11 +107,11 @@ def print_closure(s, nodes=False, comments=False):
                   not isinstance(u.index.utype,str) and
                   u.index.utype.leaf_type == "LF_STRUCTURE"):
                 if nodes:
-                    print '    %s_%d -> %s_%d [style=dashed,color=red]; %s' % (s.name, s.tpi_idx, u.index.utype.name, u.index.utype.tpi_idx,
-                                                                  "//" + u.name if comments else "")
+                    print ('    %s_%d -> %s_%d [style=dashed,color=red]; %s' % (s.name, s.tpi_idx, u.index.utype.name, u.index.utype.tpi_idx,
+                                                                  "//" + u.name if comments else ""))
                 else:
-                    print '    %s -> %s [style=dashed,color=red]; %s' % (s.name, u.index.utype.name,
-                                                                  "//" + u.name if comments else "")
+                    print ('    %s -> %s [style=dashed,color=red]; %s' % (s.name, u.index.utype.name,
+                                                                  "//" + u.name if comments else ""))
                 if not u.index.utype in traversed:
                     print_closure(u.index.utype, nodes)
 
@@ -131,6 +131,6 @@ pdb = pdbparse.parse(args[0])
 structs = pdb.streams[2].structures
 base_type = structs[args[1]]
 
-print "digraph %s {" % basename(args[0]).split('.')[0]
+print ("digraph %s {" % basename(args[0]).split('.')[0])
 print_closure(base_type, opts.nodes, opts.comments)
-print "}"
+print ("}")

@@ -90,4 +90,4 @@ structs = [ t for t in tpi_stream.types.values()
                 if t.leaf_type == 'LF_STRUCTURE' and not t.prop.fwdref ]
 
 for s in structs:
-    if s.name == "_EPROCESS": print construct(s)
+    if s.name == "_EPROCESS": print(construct(s))

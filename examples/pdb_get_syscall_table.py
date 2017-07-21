@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 
 import sys
 import pdbparse
@@ -33,7 +34,7 @@ values = [
 ]
 
 if len(sys.argv) != 3:
-    print >> sys.stderr, "usage: %s <exe> <pdb>" % sys.argv[0]
+    print ("usage: %s <exe> <pdb>" % sys.argv[0], file=sys.stderr)
     sys.exit(1)
 
 pe = PE(sys.argv[1])
@@ -100,6 +101,6 @@ for i,val in enumerate(values):
     if not val.ServiceTable: continue
     for j in range(val.ServiceLimit):
         ordinal = i << 12 | j
-        print "Ordinal %#06x Name: %s Args: %d (%#x bytes) Offset: %#x" % (ordinal, undecorate(function_names[ordinal])[0],
+        print ("Ordinal %#06x Name: %s Args: %d (%#x bytes) Offset: %#x" % (ordinal, undecorate(function_names[ordinal])[0],
                                                                        val.ArgumentTable[j] / 4, val.ArgumentTable[j],
-                                                                       val.ServiceTable[j])
+                                                                       val.ServiceTable[j]))
