@@ -276,7 +276,7 @@ class PDBFPOStrings(ParsedPDBStream):
         self.fpo_strings = fpo.FPO_STRING_DATA.parse(self.data)
     def get_string(self, offset):
         from construct import CString
-        return CString("x").parse(self.fpo_strings.StringData.Data[offset:])
+        return CString("x", encoding="utf8").parse(self.fpo_strings.StringData.Data[offset:])
 
 class PDBFPOStream(ParsedPDBStream):
     def load(self):

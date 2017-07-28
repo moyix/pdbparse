@@ -93,8 +93,8 @@ DBIExHeader = Struct("DBIExHeader",
     ULInt32("offsets"),
     ULInt32("niSource"),
     ULInt32("niCompiler"),
-    CString("modName"),
-    CString("objName"),
+    CString("modName", encoding="utf8"),
+    CString("objName", encoding="utf8"),
 )
 
 DbiDbgHeader = Struct("DbiDbgHeader",
@@ -152,7 +152,7 @@ def parse_stream(stream):
     for i in range(0, fileIndex.cMod):
         these = []
         for j in range(modStart[i], modStart[i]+cRefCnt[i]):
-            Name = CString("Name").parse(Names[NameRef[j]:])
+            Name = CString("Name", encoding="utf8").parse(Names[NameRef[j]:])
             files.append(Name)
             these.append(Name)
         modules.append(these)

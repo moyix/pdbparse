@@ -9,7 +9,7 @@ CV_RSDS_HEADER = Struct("CV_RSDS",
     Const(Bytes("Signature", 4), b"RSDS"),
     GUID("GUID"),
     ULInt32("Age"),
-    CString("Filename"),
+    CString("Filename", encoding="utf8"),
 )
 
 CV_NB10_HEADER = Struct("CV_NB10",
@@ -17,7 +17,7 @@ CV_NB10_HEADER = Struct("CV_NB10",
     ULInt32("Offset"),
     ULInt32("Timestamp"),
     ULInt32("Age"),
-    CString("Filename"),
+    CString("Filename", encoding="utf8"),
 )
 
 DebugDirectoryType = Enum(ULInt32("Type"),
@@ -77,7 +77,7 @@ IMAGE_DEBUG_MISC = Struct("IMAGE_DEBUG_MISC",
     Array(3, Byte("Reserved")),
     Tunnel(
         String("Strings", lambda ctx: ctx.Length - 12),
-        GreedyRange(CString("Strings")),
+        GreedyRange(CString("Strings", encoding="utf8")),
     ),
 )
 
@@ -94,7 +94,7 @@ DbgFile = Struct("DbgFile",
     Tunnel(
         String("data",
             lambda ctx: ctx.IMAGE_SEPARATE_DEBUG_HEADER.ExportedNamesSize),
-        GreedyRange(CString("ExportedNames")),
+        GreedyRange(CString("ExportedNames", encoding="utf8")),
     ),
     Array(lambda ctx: ctx.IMAGE_SEPARATE_DEBUG_HEADER.DebugDirectorySize 
                   / IMAGE_DEBUG_DIRECTORY.sizeof(), IMAGE_DEBUG_DIRECTORY)

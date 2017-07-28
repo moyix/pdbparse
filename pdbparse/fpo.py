@@ -48,7 +48,7 @@ FPO_STRING_DATA = Struct("FPO_STRING_DATA",
         String("Data",lambda ctx: ctx._.szDataLen),
         Tunnel(
             String("Strings",lambda ctx: ctx._.szDataLen),
-            GreedyRange(CString("Strings")),
+            GreedyRange(CString("Strings", encoding="utf8")),
         ),
     ),
     ULInt32("lastDwIndex"), # data remaining = (last_dword_index+1)*4
