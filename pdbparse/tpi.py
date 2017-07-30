@@ -761,7 +761,7 @@ def val(name):
             Switch("val", lambda ctx: leaf_type._decode(ctx.value_or_type, {}),
                 {
                     "LF_CHAR": Struct("char",
-                        String("value", 1),
+                        SLInt8("value"),
                         CString("name", encoding="utf8"),
                     ),
                     "LF_SHORT": Struct("short",

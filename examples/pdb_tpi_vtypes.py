@@ -129,8 +129,7 @@ def member_str(m):
         enum_membs = [ e for e in m.fieldlist.substructs if e.leaf_type == "LF_ENUMERATE" ]
         choices = {}
         for e in enum_membs:
-            e_val = -1 if e.enum_value == b'\xff' else e.enum_value
-            choices[e_val] = e.name
+            choices[e.enum_value] = e.name
         return "['Enumeration', dict(target = %s, choices = %s)]" % (vtype[m.utype], choices)
     else:
         return "[UNIMPLEMENTED %s]" % m.leaf_type

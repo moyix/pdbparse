@@ -123,8 +123,7 @@ def enum_pretty_str(enum):
     enumerated = []
     utypename = get_tpname(enum.utype)
     for e in enum.fieldlist.substructs:
-        e_val = -1 if e.enum_value == b'\xff' else e.enum_value
-        enumerated.append("%s = %d" % (e.name, e_val))
+        enumerated.append("%s = %d" % (e.name, e.enum_value))
     return (enum.name + (" (%s)\n    " % utypename) + 
             "\n    ".join(enumerated))
 

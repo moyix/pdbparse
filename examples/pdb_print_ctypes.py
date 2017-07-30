@@ -938,9 +938,8 @@ def flstr(lf):
 
     enum_membs = [ e for e in lf.fieldlist.substructs if e.leaf_type == "LF_ENUMERATE" ]
     for i,e in enumerate(enum_membs):
-        e_val = -1 if e.enum_value == b'\xff' else e.enum_value
         comma = ",\n" if i < len(enum_membs) - 1 else ""
-        flstr += '{0}{1:<70} = {2:>4}{3}'.format(indent,e.name, e_val, comma)#indent + "%s = %s%s\n" % (e.name, e_val, comma)
+        flstr += '{0}{1:<70} = {2:>4}{3}'.format(indent, e.name, e.enum_value, comma)#indent + "%s = %s%s\n" % (e.name, e_val, comma)
     return flstr
 
 def struct_dependencies(lf):
