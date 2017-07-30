@@ -98,6 +98,8 @@ def get_size(lf):
         return ARCH_PTR_SIZE
     elif lf.leaf_type == "LF_MODIFIER":
         return get_size(lf.modified_type)
+    elif lf.leaf_type == "LF_ENUM":
+        return get_size(lf.utype)
     else: return -1
 
 def member_str(m):
