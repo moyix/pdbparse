@@ -18,7 +18,7 @@ setup(name='pdbparse',
         'Operating System :: OS Independent',
       ],
       ext_modules=[
-        Extension('pdbparse._undname', ['src/undname.c'], export_symbols=['undname'])
+        Extension('pdbparse._undname', sources = ['src/undname.c', 'src/undname_py.c'])
       ],
       scripts=[
         'examples/pdb_dump.py',
