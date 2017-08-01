@@ -1,10 +1,6 @@
 import os
-import ctypes
+from . import _undname # automatically resolve and load shared library (_undame.pyd or _undame.so)
 
-_undname = ctypes.CDLL(os.path.join(os.path.dirname(__file__), '_undname.so'))
-
-_undname.undname.restype = ctypes.c_char_p
-BUFSZ = 2048
 
 UNDNAME_COMPLETE                 = 0x0000
 UNDNAME_NO_LEADING_UNDERSCORES   = 0x0001 # Don't show __ in calling convention
@@ -26,8 +22,9 @@ UNDNAME_NO_SPECIAL_SYMS          = 0x4000
 UNDNAME_NO_COMPLEX_TYPE          = 0x8000
 
 def undname(name, flags=UNDNAME_NAME_ONLY):
+  
     if name.startswith("?"):
-        name = _undname.undname(ctypes.create_string_buffer(BUFSZ), name, BUFSZ, flags)
+        name = _undname.undname(name, flags)
     elif name.startswith("_") or name.startswith("@"):
         name = name.rsplit('@',1)[0][1:]
 
