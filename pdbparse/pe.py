@@ -2,9 +2,11 @@
 
 from construct import *
 
-IMAGE_SECTION_HEADER = Struct("IMAGE_SECTION_HEADER",
+IMAGE_SECTION_HEADER = Struct(
+    "IMAGE_SECTION_HEADER",
     String("Name", 8),
-    Union("Misc",
+    Union(
+        "Misc",
         ULInt32("PhysicalAddress"),
         ULInt32("VirtualSize"),
     ),
