@@ -1,8 +1,10 @@
-import ntpath
 import binascii
+import ntpath
+import sys
 
 from pefile import PE, DEBUG_TYPE, DIRECTORY_ENTRY
-from pdbparse.dbgold import CV_RSDS_HEADER, CV_NB10_HEADER, DebugDirectoryType
+
+from pdbparse.dbgold import CV_RSDS_HEADER, CV_NB10_HEADER
 
 
 class PENoDebugDirectoryEntriesError(Exception):

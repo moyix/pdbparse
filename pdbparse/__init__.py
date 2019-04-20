@@ -24,7 +24,8 @@ _PDB7_FMT_SIZE = calcsize(_PDB7_FMT)
 # "pagesize"
 def _pages(length, pagesize):
     num_pages = length // pagesize
-    if (length % pagesize): num_pages += 1
+    if (length % pagesize):
+        num_pages += 1
     return num_pages
 
 
@@ -34,8 +35,10 @@ class StreamFile:
         self.fp = fp
         self.pages = pages
         self.page_size = page_size
-        if size == -1: self.end = len(pages) * page_size
-        else: self.end = size
+        if size == -1:
+            self.end = len(pages) * page_size
+        else:
+            self.end = size
         self.pos = 0
 
     def read(self, size = -1):
@@ -60,8 +63,10 @@ class StreamFile:
         elif whence == 2:
             self.pos = self.end + offset
 
-        if self.pos < 0: self.pos = 0
-        if self.pos > self.end: self.pos = self.end
+        if self.pos < 0:
+            self.pos = 0
+        if self.pos > self.end:
+            self.pos = self.end
 
     def tell(self):
         return self.pos
@@ -109,8 +114,10 @@ class PDBStream:
         self.pages = pages
         self.index = index
         self.page_size = page_size
-        if size == -1: self.size = len(pages) * page_size
-        else: self.size = size
+        if size == -1:
+            self.size = len(pages) * page_size
+        else:
+            self.size = size
         self.stream_file = StreamFile(self.fp, pages, size = size, page_size = page_size)
 
     def reload(self):
@@ -141,8 +148,10 @@ class ParsedPDBStream(PDBStream):
                  parent = None):
         PDBStream.__init__(
             self, fp, pages, index, size = size, page_size = page_size, fast_load = fast_load, parent = parent)
-        if fast_load: return
-        else: self.load()
+        if fast_load:
+            return
+        else:
+            self.load()
 
     def load(self):
         pass
@@ -293,7 +302,7 @@ class PDBDebugStream(ParsedPDBStream):
                 self.parent.add_supported_stream("STREAM_FPO", debug.DBIDbgHeader.snFPO, PDBFPOStream)
             if debug.DBIDbgHeader.snNewFPO != -1:
                 self.parent.add_supported_stream("STREAM_FPO_NEW", debug.DBIDbgHeader.snNewFPO, PDBNewFPOStream)
-                #self.parent.add_supported_stream("STREAM_FPO_STRINGS", debug.DBIDbgHeader.snNewFPO+1, PDBFPOStrings)
+                # self.parent.add_supported_stream("STREAM_FPO_STRINGS", debug.DBIDbgHeader.snNewFPO+1, PDBFPOStrings)
 
             # Currently unparsed, but we know their names
             if debug.DBIDbgHeader.snXdata != -1:
@@ -330,7 +339,8 @@ class PDBNewFPOStream(ParsedPDBStream):
 
     def load2(self):
         if self.parent:
-            if not hasattr(self.parent, "STREAM_FPO_STRINGS"): return
+            if not hasattr(self.parent, "STREAM_FPO_STRINGS"):
+                return
             for f in self.fpo:
                 f.ProgramString = self.parent.STREAM_FPO_STRINGS.get_string(f.ProgramStringOffset)
 
@@ -360,7 +370,8 @@ class PDBGlobalSymbolStream(ParsedPDBStream):
         self.vars = {}
         self.funcs = {}
         for g in self.globals:
-            if not hasattr(g, 'symtype'): continue
+            if not hasattr(g, 'symtype'):
+                continue
             if g.symtype == 0:
                 if g.name.startswith("_"):
                     self.vars[g.name[1:]] = g
@@ -392,7 +403,7 @@ _stream_types7 = {
 
 _stream_types2 = {
     PDB_STREAM_TPI: PDBTypeStream,
-    #PDB_STREAM_PDB: PDBInfoStream,
+    # PDB_STREAM_PDB: PDBInfoStream,
     PDB_STREAM_DBI: PDBDebugStream,
 }
 
@@ -499,7 +510,7 @@ class PDB7(PDB):
         page_list_fmt = "<" + ("%dI" % num_root_pages)
         root_page_list = unpack(page_list_fmt, root_page_data[:num_root_pages * 4])
 
-        #root_stream_data = self.read(root_page_list, root_size)
+        # root_stream_data = self.read(root_page_list, root_size)
 
         self.root_stream = PDB7RootStream(
             self.fp, root_page_list, index = PDB_STREAM_ROOT, size = root_size, page_size = self.page_size)

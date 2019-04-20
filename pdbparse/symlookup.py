@@ -1,9 +1,8 @@
-import pdbparse
 import os
-from operator import itemgetter, attrgetter
 from bisect import bisect_right
-from pdbparse.undecorate import undecorate
-from itertools import islice, count
+from operator import itemgetter, attrgetter
+
+import pdbparse
 
 
 class DummyOmap(object):
@@ -27,7 +26,7 @@ class Lookup(object):
                 not_found.append((base, pdbbase))
                 continue
 
-            #print ("Loading symbols for %s..." % pdbbase)
+            # print ("Loading symbols for %s..." % pdbbase)
             try:
                 # Do this the hard way to avoid having to load
                 # the types stream in mammoth PDB files
@@ -47,7 +46,7 @@ class Lookup(object):
 
             except AttributeError as e:
                 pass
-            #except Exception as e:
+            # except Exception as e:
             #    print ("WARN: error %s parsing %s, skipping" % (e,pdbbase))
             #    not_found.append( (base, pdbbase) )
             #    continue
@@ -71,7 +70,8 @@ class Lookup(object):
             self.addrs[base, limit]['name'] = pdbbase
             self.addrs[base, limit]['addrs'] = []
             for sym in gsyms.globals:
-                if not hasattr(sym, 'offset'): continue
+                if not hasattr(sym, 'offset'):
+                    continue
                 off = sym.offset
                 try:
                     virt_base = sects[sym.segment - 1].VirtualAddress

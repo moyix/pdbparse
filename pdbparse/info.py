@@ -1,36 +1,35 @@
-from construct import *
 from io import BytesIO
 
-_strarray = GreedyRange(CString("names", encoding = "utf8"))
+from construct import *
+
+_strarray = "names" / GreedyRange(CString(encoding = "utf8"))
 
 
 class StringArrayAdapter(Adapter):
 
-    def _encode(self, obj, context):
-        return _strarray._build(BytesIO(obj), context)
+    def _encode(self, obj, context, path):
+        return _strarray._build(BytesIO(obj), context, path)
 
-    def _decode(self, obj, context):
-        return _strarray._parse(BytesIO(obj), context)
+    def _decode(self, obj, context, path):
+        return _strarray._parse(BytesIO(obj), context, path)
 
 
 def GUID(name):
-    return Struct(
-        name,
-        ULInt32("Data1"),
-        ULInt16("Data2"),
-        ULInt16("Data3"),
-        String("Data4", 8),
+    return name / Struct(
+        "Data1" / Int32ul,
+        "Data2" / Int16ul,
+        "Data3" / Int16ul,
+        "Data4" / PaddedString(8, encoding = "utf16"),
     )
 
 
-Info = Struct(
-    "Info",
-    ULInt32("Version"),
-    ULInt32("TimeDateStamp"),
-    ULInt32("Age"),
+Info = "Info" / Struct(
+    "Version" / Int32ul,
+    "TimeDateStamp" / Int32ul,
+    "Age" / Int32ul,
     GUID("GUID"),
-    ULInt32("cbNames"),
-    StringArrayAdapter(MetaField("names", lambda ctx: ctx.cbNames)),
+    "cbNames" / Int32ul,
+    "names" / StringArrayAdapter(Bytes(lambda ctx: ctx.cbNames)),
 )
 
 

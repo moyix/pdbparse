@@ -3,10 +3,9 @@
 from construct import *
 from bisect import bisect
 
-OMAP_ENTRY = Struct(
-    "OmapFromSrc",
-    ULInt32("From"),
-    ULInt32("To"),
+OMAP_ENTRY = "OmapFromSrc" / Struct(
+    "From" / Int32ul,
+    "To" / Int32ul,
 )
 
 OMAP_ENTRIES = GreedyRange(OMAP_ENTRY)

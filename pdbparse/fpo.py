@@ -1,37 +1,33 @@
 from construct import *
 
 # FPO DATA
-FPO_DATA = Struct(
-    "FPO_DATA",
-    ULInt32("ulOffStart"),  # offset 1st byte of function code
-    ULInt32("cbProcSize"),  # number of bytes in function
-    ULInt32("cdwLocals"),  # number of bytes in locals/4
-    ULInt16("cdwParams"),  # number of bytes in params/4
-    Embed(
-        BitStruct(
-            "BitValues",
-            Octet("cbProlog"),  # number of bytes in prolog
-            BitField("cbFrame", 2),  # frame type
-            Bit("reserved"),  # reserved for future use
-            Flag("fUseBP"),  # TRUE if EBP has been allocated
-            Flag("fHasSEH"),  # TRUE if SEH in func
-            BitField("cbRegs", 3),  # number of regs saved
-        )),
+FPO_DATA = "FPO_DATA" / Struct(
+    "ulOffStart" / Int32ul,  # offset 1st byte of function code
+    "cbProcSize" / Int32ul,  # number of bytes in function
+    "cdwLocals" / Int32ul,  # number of bytes in locals/4
+    "cdwParams" / Int16ul,  # number of bytes in params/4
+    Embedded("BitValues" / BitStruct(
+        "cbProlog" / Octet,  # number of bytes in prolog
+        "cbFrame" / BitsInteger(2),  # frame type
+        "reserved" / Bit,  # reserved for future use
+        "fUseBP" / Flag,  # TRUE if EBP has been allocated
+        "fHasSEH" / Flag,  # TRUE if SEH in func
+        "cbRegs" / BitsInteger(3),  # number of regs saved
+    )),
 )
 
 # New style FPO records with program strings
-FPO_DATA_V2 = Struct(
-    "FPO_DATA_V2",
-    ULInt32("ulOffStart"),
-    ULInt32("cbProcSize"),
-    ULInt32("cbLocals"),
-    ULInt32("cbParams"),
-    ULInt32("maxStack"),  # so far only observed to be 0
-    ULInt32("ProgramStringOffset"),
-    ULInt16("cbProlog"),
-    ULInt16("cbSavedRegs"),
-    FlagsEnum(
-        ULInt32("flags"),
+FPO_DATA_V2 = "FPO_DATA_V2" / Struct(
+    "ulOffStart" / Int32ul,
+    "cbProcSize" / Int32ul,
+    "cbLocals" / Int32ul,
+    "cbParams" / Int32ul,
+    "maxStack" / Int32ul,  # so far only observed to be 0
+    "ProgramStringOffset" / Int32ul,
+    "cbProlog" / Int16ul,
+    "cbSavedRegs" / Int16ul,
+    "flags" / FlagsEnum(
+        Int32ul,
         SEH = 1,
         CPPEH = 2,  # conjectured
         fnStart = 4,
@@ -47,18 +43,17 @@ FPO_DATA_LIST_V2 = GreedyRange(FPO_DATA_V2)
 # include things that are not just FPO related.
 FPO_STRING_DATA = Struct(
     "FPO_STRING_DATA",
-    Const(Bytes("Signature", 4), b"\xFE\xEF\xFE\xEF"),
-    ULInt32("Unk1"),
-    ULInt32("szDataLen"),
-    Union(
-        "StringData",
-        String("Data", lambda ctx: ctx._.szDataLen),
-        Tunnel(
-            String("Strings", lambda ctx: ctx._.szDataLen),
-            GreedyRange(CString("Strings", encoding = "utf8")),
+    "Signature" / Const(b"\xFE\xEF\xFE\xEF", Bytes(4)),
+    "Unk1" / Int32ul,
+    "szDataLen" / Int32ul,
+    "StringData" / Union(
+        "Data" / Bytes(lambda ctx: ctx._.szDataLen),
+        "Strings" / RestreamData(
+            Bytes(lambda ctx: ctx._.szDataLen),
+            GreedyRange(CString(encoding = "utf8")),
         ),
     ),
-    ULInt32("lastDwIndex"),  # data remaining = (last_dword_index+1)*4
-    HexDumpAdapter(String("UnkData", lambda ctx: ((ctx.lastDwIndex + 1) * 4))),
-    Terminator,
+    "lastDwIndex" / Int32ul,  # data remaining = (last_dword_index+1)*4
+    "UnkData" / HexDump(Bytes(lambda ctx: ((ctx.lastDwIndex + 1) * 4))),
+    Terminated,
 )

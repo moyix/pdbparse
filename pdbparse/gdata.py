@@ -1,40 +1,31 @@
 # Python 2 and 3
-from io import BytesIO
 
 from construct import *
-from pdbparse.tpi import merge_subcon
 
-gsym = Struct(
-    "global", ULInt16("leaf_type"),
-    Embed(
-        Switch(
-            "data",
-            lambda ctx: ctx.leaf_type,
-            {
-                0x110E:
-                Struct(
-                    "data_v3",
-                    ULInt32("symtype"),
-                    ULInt32("offset"),
-                    ULInt16("segment"),
-                    CString("name", encoding = "utf8"),
-                ),
-                0x1009:
-                Struct(
-                    "data_v2",
-                    ULInt32("symtype"),
-                    ULInt32("offset"),
-                    ULInt16("segment"),
-                    PascalString("name", length_field = ULInt8("len")),
-                ),
-            },
-            default = Pass,
-        )))
+gsym = "global" / Struct(
+    "leaf_type" / Int16ul, "data" / Switch(
+        lambda ctx: ctx.leaf_type, {
+            0x110E:
+            "data_v3" / Struct(
+                "symtype" / Int32ul,
+                "offset" / Int32ul,
+                "segment" / Int16ul,
+                "name" / CString(encoding = "utf8"),
+            ),
+            0x1009:
+            "data_v2" / Struct(
+                "symtype" / Int32ul,
+                "offset" / Int32ul,
+                "segment" / Int16ul,
+                "name" / PascalString(lengthfield = "len" / Int8ul, encoding = "utf8"),
+            ),
+        }))
 
-GlobalsData = OptionalGreedyRange(Tunnel(
-    PascalString("globals", length_field = ULInt16("len")),
-    gsym,
-))
+GlobalsData = GreedyRange(
+    RestreamData(
+        "globals" / PascalString(lengthfield = "len" / Int16ul, encoding = "utf8"),
+        gsym,
+    ))
 
 
 def parse(data):

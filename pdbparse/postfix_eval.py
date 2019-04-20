@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-from pprint import pprint
-
-from operator import add, sub, mul, div, mod, pow, and_, or_, lshift, rshift, xor
+from operator import add, sub, mul, mod, itruediv, pow, and_, or_, lshift, rshift
 from operator import inv
 
 global vars
@@ -19,7 +17,7 @@ def assign(a, b):
 binary_ops = {
     "+": add,
     "-": sub,
-    "/": div,
+    "/": itruediv,
     "*": mul,
     "%": mod,
     "**": pow,
