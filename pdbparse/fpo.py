@@ -47,6 +47,7 @@ FPO_STRING_DATA = Struct(
     "Unk1" / Int32ul,
     "szDataLen" / Int32ul,
     "StringData" / Union(
+        0,
         "Data" / Bytes(lambda ctx: ctx._.szDataLen),
         "Strings" / RestreamData(
             Bytes(lambda ctx: ctx._.szDataLen),
