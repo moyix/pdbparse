@@ -328,7 +328,7 @@ class PDBFPOStream(ParsedPDBStream):
 
     def load(self):
         from pdbparse import fpo
-        self.fpo = fpo.FPO_DATA_LIST.parse(self.data)
+        self.fpo = fpo.parse_FPO_DATA_LIST(self.data)
 
 
 class PDBNewFPOStream(ParsedPDBStream):
