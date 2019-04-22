@@ -5,7 +5,7 @@ from construct import *
 IMAGE_SECTION_HEADER = "IMAGE_SECTION_HEADER" / Struct(
     "Name" / PaddedString(8, encoding = "utf8"),
     "Misc" / Union(
-        4,
+        0,
         "PhysicalAddress" / Int32ul,
         "VirtualSize" / Int32ul,
     ),
