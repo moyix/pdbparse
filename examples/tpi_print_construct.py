@@ -44,32 +44,31 @@ base_type_size = {
     "T_UQUAD": 8,
     "T_USHORT": 2,
 }
+
+
 def get_size(lf):
-    if isinstance(lf,str):
+    if isinstance(lf, str):
         return base_type_size[lf]
-    elif (lf.leaf_type == "LF_STRUCTURE" or
-          lf.leaf_type == "LF_ARRAY" or
-          lf.leaf_type == "LF_UNION"):
+    elif (lf.leaf_type == "LF_STRUCTURE" or lf.leaf_type == "LF_ARRAY" or lf.leaf_type == "LF_UNION"):
         return lf.size
     elif lf.leaf_type == "LF_POINTER":
         return ARCH_PTR_SIZE
     elif lf.leaf_type == "LF_MODIFIER":
         return get_size(lf.modified_type)
-    else: return -1
+    else:
+        return -1
 
 
-def construct(lf, name=None):
+def construct(lf, name = None):
     if isinstance(lf, str):
         return '%s' % (con_base_type[lf] % name)
     elif lf.leaf_type == 'LF_POINTER':
         if hasattr(lf.utype, 'name'):
             return 'ULInt32("%s-%s")' % (name or "ptr", lf.utype.name)
         else:
-            return 'ULInt32("%s-%s_%s")' % (name or "ptr", lf.utype.leaf_type,
-                lf.utype.tpi_idx)
+            return 'ULInt32("%s-%s_%s")' % (name or "ptr", lf.utype.leaf_type, lf.utype.tpi_idx)
     elif lf.leaf_type == 'LF_STRUCTURE':
-        return 'Struct("%s", # %s\n%s\n)' % (name or lf.name, lf.name,
-            construct(lf.fieldlist))
+        return 'Struct("%s", # %s\n%s\n)' % (name or lf.name, lf.name, construct(lf.fieldlist))
     elif lf.leaf_type == 'LF_FIELDLIST':
         return ',\n'.join(construct(l) for l in lf.substructs)
     elif lf.leaf_type == "LF_MEMBER":
@@ -85,9 +84,9 @@ def construct(lf, name=None):
     else:
         return "Unimplemented %s" % lf.leaf_type
 
+
 tpi_stream = tpi.parse_stream(open(sys.argv[1]))
-structs = [ t for t in tpi_stream.types.values() 
-                if t.leaf_type == 'LF_STRUCTURE' and not t.prop.fwdref ]
+structs = [t for t in tpi_stream.types.values() if t.leaf_type == 'LF_STRUCTURE' and not t.prop.fwdref]
 
 for s in structs:
     if s.name == "_EPROCESS": print(construct(s))

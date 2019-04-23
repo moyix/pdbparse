@@ -2,20 +2,21 @@
 
 from construct import *
 
-IMAGE_SECTION_HEADER = Struct("IMAGE_SECTION_HEADER",
-    String("Name", 8),
-    Union("Misc",
-        ULInt32("PhysicalAddress"),
-        ULInt32("VirtualSize"),
+IMAGE_SECTION_HEADER = "IMAGE_SECTION_HEADER" / Struct(
+    "Name" / PaddedString(8, encoding = "utf8"),
+    "Misc" / Union(
+        0,
+        "PhysicalAddress" / Int32ul,
+        "VirtualSize" / Int32ul,
     ),
-    ULInt32("VirtualAddress"),
-    ULInt32("SizeOfRawData"),
-    ULInt32("PointerToRawData"),
-    ULInt32("PointerToRelocations"),
-    ULInt32("PointerToLinenumbers"),
-    ULInt16("NumberOfRelocations"),
-    ULInt16("NumberOfLinenumbers"),
-    ULInt32("Characteristics"),
+    "VirtualAddress" / Int32ul,
+    "SizeOfRawData" / Int32ul,
+    "PointerToRawData" / Int32ul,
+    "PointerToRelocations" / Int32ul,
+    "PointerToLinenumbers" / Int32ul,
+    "NumberOfRelocations" / Int16ul,
+    "NumberOfLinenumbers" / Int16ul,
+    "Characteristics" / Int32ul,
 )
 
-Sections = OptionalGreedyRange(IMAGE_SECTION_HEADER)
+Sections = GreedyRange(IMAGE_SECTION_HEADER)

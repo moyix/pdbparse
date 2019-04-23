@@ -2,6 +2,7 @@
 
 prefixes = "__imp__", "__imp_@", "__imp_", "_", "@", "\x7F"
 
+
 def undecorate(name):
     stack = -1
     conv = "UNDEFINED"
@@ -10,10 +11,10 @@ def undecorate(name):
         if name.startswith(p):
             name = name[len(p):]
             break
-    
+
     if name.startswith("@@") or name.startswith("?"):
         name = orig_name
-    else: 
+    else:
         name_parts = name.split("@")
         if len(name_parts) == 2:
             try:
