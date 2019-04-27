@@ -413,6 +413,9 @@ class PDB:
     def __init__(self, fp, fast_load = False):
         self.fp = fp
         self.fast_load = fast_load
+        self.page_size = None
+        self._stream_map = {}
+        self._stream_names = {}
 
     def read(self, pages, size = -1):
         """Read a portion of this PDB file, given a list of pages.
