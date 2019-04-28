@@ -7,7 +7,7 @@ from pdbparse.pe import IMAGE_SECTION_HEADER
 
 CV_RSDS_HEADER = "CV_RSDS" / Struct(
     "Signature" / Const(b"RSDS", Bytes(4)),
-    "GUID" / GUID,
+    GUID("GUID"),
     "Age" / Int32ul,
     "Filename" / CString(encoding = "utf8"),
 )
@@ -91,7 +91,7 @@ DbgFile = "DbgFile" / Struct(
     IMAGE_SEPARATE_DEBUG_HEADER,
     Array(lambda ctx: ctx.IMAGE_SEPARATE_DEBUG_HEADER.NumberOfSections, IMAGE_SECTION_HEADER),
     "ExportedNames" / RestreamData(
-        PaddedString(lambda ctx: ctx.IMAGE_SEPARATE_DEBUG_HEADER.ExportedNamesSize),
+        Bytes(lambda ctx: ctx.IMAGE_SEPARATE_DEBUG_HEADER.ExportedNamesSize),
         GreedyRange(CString(encoding = "utf8")),
     ),
     Array(lambda ctx: ctx.IMAGE_SEPARATE_DEBUG_HEADER.DebugDirectorySize / IMAGE_DEBUG_DIRECTORY.sizeof(),

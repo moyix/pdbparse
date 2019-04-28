@@ -19,7 +19,7 @@ def GUID(name):
         "Data1" / Int32ul,
         "Data2" / Int16ul,
         "Data3" / Int16ul,
-        "Data4" / PaddedString(8, encoding = "utf16"),
+        "Data4" / Bytes(8),
     )
 
 
