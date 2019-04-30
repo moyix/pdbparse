@@ -1225,7 +1225,7 @@ def parse_stream(fp, unnamed_hack = True, elim_fwdrefs = True):
 
     if unnamed_hack:
         for i in types:
-            if (hasattr(types[i], 'name') and (types[i].name == "__unnamed" or types[i].name == "<unnamed-tag>")):
+            if (hasattr(types[i], 'name') and types[i].name in ["__unnamed", "<unnamed-tag>", "<anonymous-tag>"]):
                 types[i].name = ("__unnamed_%x" % types[i].tpi_idx)
 
     return tpi_stream
