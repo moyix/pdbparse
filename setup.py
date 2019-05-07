@@ -4,11 +4,11 @@ from distutils.core import setup, Extension
 
 setup(
     name = 'pdbparse',
-    version = '1.1',
+    version = '1.3',
     description = 'Python parser for Microsoft PDB files',
     author = 'Brendan Dolan-Gavitt',
     author_email = 'brendandg@gatech.edu',
-    url = 'http://pdbparse.googlecode.com/',
+    url = 'https://github.com/moyix/pdbparse/',
     packages = ['pdbparse'],
     install_requires = ['construct>=2.9', 'construct<2.10', 'pefile'],
     classifiers = [
