@@ -88,7 +88,7 @@ def get_rsds(dbgdata):
     dbg = CV_RSDS_HEADER.parse(dbgdata)
     guidstr = u"%08x%04x%04x%s%x" % (dbg.GUID.Data1, dbg.GUID.Data2, dbg.GUID.Data3, binascii.hexlify(
         dbg.GUID.Data4).decode('ascii'), dbg.Age)
-    filename = ntpath.basename(dbg.Filename.decode('ascii'))
+    filename = ntpath.basename(dbg.Filename)
     return guidstr, filename
 
 
@@ -103,7 +103,7 @@ def get_nb10(dbgdata):
     """
     dbg = CV_NB10_HEADER.parse(dbgdata)
     guidstr = u"%x%x" % (dbg.Timestamp, dbg.Age)
-    filename = ntpath.basename(dbg.Filename.decode('ascii'))
+    filename = ntpath.basename(dbg.Filename)
     return guidstr, filename
 
 
