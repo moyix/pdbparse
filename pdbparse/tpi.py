@@ -699,6 +699,14 @@ def val(name):
                         "value" / Int32ul,
                         "name" / CString(encoding = "utf8"),
                     ),
+                    "LF_QUADWORD": "char" / Struct(
+                        "value" / Int64sl,
+                        "name" / CString(encoding = "utf8"),
+                    ),
+                    "LF_UQUADWORD": "char" / Struct(
+                        "value" / Int64ul,
+                        "name" / CString(encoding = "utf8"),
+                    ),
                 },
             ),
         ),
