@@ -27,7 +27,9 @@ type_refs = {
 
     # TODO: Unparsed
     "LF_METHODLIST": [],
+}
 
+type_refs_fieldlist = {
     # FIELDLIST substructures
     "LF_BCLASS": ["index"],
     "LF_ENUMERATE": [],
@@ -699,6 +701,14 @@ def val(name):
                         "value" / Int32ul,
                         "name" / CString(encoding = "utf8"),
                     ),
+                    "LF_QUADWORD": "char" / Struct(
+                        "value" / Int64sl,
+                        "name" / CString(encoding = "utf8"),
+                    ),
+                    "LF_UQUADWORD": "char" / Struct(
+                        "value" / Int64ul,
+                        "name" / CString(encoding = "utf8"),
+                    ),
                 },
             ),
         ),
@@ -1090,7 +1100,7 @@ def fix_value(leaf):
     delattr(leaf, 'value')
 
 
-def resolve_typerefs(leaf, types, min):
+def resolve_typerefs(leaf, types, min, is_fieldlist):
     """Resolve the numeric type references in a leaf node.
 
     For each reference to another type in the leaf node, look up the
@@ -1102,7 +1112,9 @@ def resolve_typerefs(leaf, types, min):
     types: a dictionary of index->type mappings
     min: the value of tpi_min; that is, the lowest type index in the stream
     """
-    for attr in type_refs[leaf.leaf_type]:
+    type_refs_dict = type_refs_fieldlist if is_fieldlist else type_refs
+
+    for attr in type_refs_dict.get(leaf.leaf_type, []):
         ref = getattr(leaf, attr)
         if isinstance(ref, list):
             newrefs = []
@@ -1124,8 +1136,10 @@ def resolve_typerefs(leaf, types, min):
     return leaf
 
 
-def merge_fwdrefs(leaf, types, map):
-    for attr in type_refs[leaf.leaf_type]:
+def merge_fwdrefs(leaf, types, map, is_fieldlist):
+    type_refs_dict = type_refs_fieldlist if is_fieldlist else type_refs
+
+    for attr in type_refs_dict.get(leaf.leaf_type, []):
         ref = getattr(leaf, attr)
         if isinstance(ref, list):
             newrefs = []
@@ -1146,7 +1160,7 @@ def merge_fwdrefs(leaf, types, map):
 
 
 def rename_2_7(lf):
-    if lf.leaf_type.endswith("_ST"):
+    if isinstance(lf.leaf_type, str) and lf.leaf_type.endswith("_ST"):
         lf.leaf_type = lf.leaf_type[:-3]
 
 
@@ -1187,9 +1201,9 @@ def parse_stream(fp, unnamed_hack = True, elim_fwdrefs = True):
     min = tpi_stream.TPIHeader.ti_min
     for i in types:
         if types[i].leaf_type == "LF_FIELDLIST":
-            types[i].substructs = ListContainer([resolve_typerefs(t, types, min) for t in types[i].substructs])
+            types[i].substructs = ListContainer([resolve_typerefs(t, types, min, True) for t in types[i].substructs])
         else:
-            types[i] = resolve_typerefs(types[i], types, min)
+            types[i] = resolve_typerefs(types[i], types, min, False)
 
     # 5. Standardize v2 leaf names to v7 convention
     for i in types:
@@ -1216,9 +1230,9 @@ def parse_stream(fp, unnamed_hack = True, elim_fwdrefs = True):
         # Change any references to the fwdref to point to the real type
         for i in types:
             if types[i].leaf_type == "LF_FIELDLIST":
-                types[i].substructs = ListContainer([merge_fwdrefs(t, types, fwdref_map) for t in types[i].substructs])
+                types[i].substructs = ListContainer([merge_fwdrefs(t, types, fwdref_map, True) for t in types[i].substructs])
             else:
-                types[i] = merge_fwdrefs(types[i], types, fwdref_map)
+                types[i] = merge_fwdrefs(types[i], types, fwdref_map, False)
         # Get rid of the resolved fwdrefs
         for i in fwdref_map:
             del types[i]

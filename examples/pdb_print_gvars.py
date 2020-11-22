@@ -16,7 +16,7 @@ class DummyOmap(object):
 
 
 def cstring(str):
-    return str.split(b'\0')[0]
+    return str.split('\0')[0]
 
 
 def main(filename, base_address):
