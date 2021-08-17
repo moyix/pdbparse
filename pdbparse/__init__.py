@@ -151,7 +151,7 @@ class ParsedPDBStream(PDBStream):
         if fast_load:
             return
         else:
-            self.load()
+            if self.size != 0: self.load()
 
     def load(self):
         pass

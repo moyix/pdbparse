@@ -47,6 +47,12 @@ vtype = {
     "T_BOOL08": "'unsigned char'",
     "T_32PREAL32": "'pointer', ['void']",
     "T_32PREAL64": "'pointer64', ['void']",
+    "T_CHAR32": "'char32_t'",
+    "T_32PCHAR32": "'pointer', ['char32_t']",
+    "T_64PCHAR32": "'pointer64', ['char32_t']",
+    "T_CHAR16": "'char16_t'",
+    "T_32PCHAR16": "'pointer', ['char16_t']",
+    "T_64PCHAR16": "'pointer64', ['char16_t']",
 }
 base_type_size = {
     "T_32PRCHAR": 4,
@@ -86,6 +92,12 @@ base_type_size = {
     "T_BOOL08": 1,
     "T_32PREAL32": 4,
     "T_32PREAL64": 8,
+    "T_CHAR32": 4,
+    "T_32PCHAR32": 4,
+    "T_64PCHAR32": 8,
+    "T_CHAR16": 2,
+    "T_32PCHAR16": 4,
+    "T_64PCHAR16": 8,
 }
 
 
@@ -166,13 +178,17 @@ if len(args) < 1:
     op.error("a PDB file is required")
 
 pdb = pdbparse.parse(args[0], fast_load = True)
-pdb.STREAM_TPI.load()
-pdb.STREAM_DBI.load()
+if pdb.STREAM_TPI.size != 0:
+    pdb.STREAM_TPI.load()
+else:
+    op.error("TPI stream size is 0; PDB has no types")
+if pdb.STREAM_DBI.size != 0:
+    pdb.STREAM_DBI.load()
 types = args[1:]
 
 if not opts.arch_ptr_size:
     dbg = pdb.STREAM_DBI
-    if dbg.machine == 'IMAGE_FILE_MACHINE_UNKNOWN':
+    if dbg.size == 0 or dbg.machine == 'IMAGE_FILE_MACHINE_UNKNOWN':
         op.error("Image type cannot be determined, please specify an architecture pointer size (using -a)")
     elif dbg.machine == 'IMAGE_FILE_MACHINE_AMD64':
         ARCH_PTR_SIZE = 8
