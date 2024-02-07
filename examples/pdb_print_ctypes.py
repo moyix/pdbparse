@@ -425,7 +425,7 @@ def get_size(lf):
     elif lf.leaf_type == "LF_ENUM":
         return get_size("T_INT4")
     elif lf.leaf_type == "LF_BITFIELD":
-        return 1.0 * lf.length / 8
+        return int((1.0 * lf.length) / 8)
     else:
         print("ERROR: don't know how to get size for %s" % lf.leaf_type, file = sys.stderr)
         return -1
@@ -480,7 +480,7 @@ def arr_str(arr, name):
         print("ERROR with array %s %s -- element size is negative" % (tpname, name), file = sys.stderr)
     if arr.size < 0:
         print("ERROR with array %s %s -- size is negative" % (tpname, name), file = sys.stderr)
-    count = arr.size / sz
+    count = arr.size // sz
     return memb_str(arr.element_type, "%s[0x%x]" % (name, count))
     #return "%s %s[%d]" % (tpname, name, count)
 
@@ -574,7 +574,7 @@ def size_from_offset_map(offset_map, comment_list, offset_of_interest = None):
     if offset_of_interest:
         starts = [offset_of_interest]
     else:
-        starts = offset_map.keys()
+        starts = list(offset_map.keys())
 
     starts.sort()
     for i in starts:
@@ -599,7 +599,7 @@ def member_list_from_offset_map(offset_map, leaf_type):
     """
     my_mlist = list()
 
-    starts = offset_map.keys()
+    starts = list(offset_map.keys())
     starts.sort()
 
     for ofs in starts:  # i is either a scalar or a list
@@ -611,7 +611,7 @@ def member_list_from_offset_map(offset_map, leaf_type):
             for member in runs[0]:
                 my_mlist.append(str(member))
         else:  # multiple runs at this offset
-            if leaf_type is not 'LF_UNION':
+            if leaf_type != 'LF_UNION':
                 union_str = "union {\n"
             else:
                 union_str = ""
@@ -628,7 +628,7 @@ def member_list_from_offset_map(offset_map, leaf_type):
                               '}; // struct size 0x%x\n' % struct_size)
                     union_str += struct
 
-            if leaf_type is not 'LF_UNION':
+            if leaf_type != 'LF_UNION':
                 union_str += '};'  ### // union size 0x%x' % max(sizes)
 
             my_mlist.append(union_str)
@@ -686,7 +686,7 @@ def merge_bitfield_sequences(members):
         if sz_int & (alignment - 1) == 0:
             aligned = sz_int
         else:
-            aligned = int((sz_int + alignment) / alignment)
+            aligned = (sz_int + alignment) // alignment
 
         return aligned
 
