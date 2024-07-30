@@ -150,7 +150,12 @@ def parse_stream(stream):
     fileIndex = sstFileIndex.parse_stream(stream)
     modStart = Array(fileIndex.cMod, Int16ul).parse_stream(stream)
     cRefCnt = Array(fileIndex.cMod, Int16ul).parse_stream(stream)
-    NameRef = Array(fileIndex.cRef, Int32ul).parse_stream(stream)
+    # In theory: cRef is supposed to contain the number of source files, but 16-bits
+    # is to short for having more than 64K source files. The real number of names is
+    # sum of cRefCnt
+    # Source: https://llvm.org/docs/PDB/DbiStream.html#file-info-substream
+    realcRef = sum(cRefCnt)
+    NameRef = Array(realcRef, Int32ul).parse_stream(stream)
     modules = []  # array of arrays of files
     files = []  # array of files (non unique)
     Names = stream.read(end - stream.tell())
