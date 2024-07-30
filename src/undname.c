@@ -73,7 +73,7 @@ typedef void  (*free_func_t)(void*);
  *      in data fields:
  *              same as for arguments and also the following
  *              ?<M>x   {<M>}x
- *              
+ *
  */
 
 struct array
@@ -135,7 +135,7 @@ static void*    und_alloc(struct parsed_symbol* sym, unsigned int len)
         sym->avail_in_first = 0;
         ptr = (char*)sym->alloc_list + sizeof(void*);
     }
-    else 
+    else
     {
         if (len > sym->avail_in_first)
         {
@@ -213,7 +213,7 @@ static BOOL str_array_push(struct parsed_symbol* sym, const char* ptr, int len,
     a->elts[a->num] = und_alloc(sym, len + 1);
     assert(a->elts[a->num]);
     memcpy(a->elts[a->num], ptr, len);
-    a->elts[a->num][len] = '\0'; 
+    a->elts[a->num][len] = '\0';
     if (++a->num >= a->max) a->max = a->num;
     {
         int i;
@@ -243,18 +243,18 @@ static char* str_array_get_ref(struct array* cref, unsigned idx)
     if (!cref) return NULL;
     if (cref->start + idx >= cref->max)
     {
-//        WARN("Out of bounds: %p %d + %d >= %d\n", 
+//        WARN("Out of bounds: %p %d + %d >= %d\n",
 //              cref, cref->start, idx, cref->max);
         return NULL;
     }
-//    TRACE("Returning %p[%d] => %s\n", 
+//    TRACE("Returning %p[%d] => %s\n",
 //          cref, idx, cref->elts[cref->start + idx]);
     return cref->elts[cref->start + idx];
 }
 
 /******************************************************************
  *		str_printf
- * Helper for printf type of command (only %s and %c are implemented) 
+ * Helper for printf type of command (only %s and %c are implemented)
  * while dynamically allocating the buffer
  */
 static char* str_printf(struct parsed_symbol* sym, const char* format, ...)
@@ -402,8 +402,8 @@ static char* get_args(struct parsed_symbol* sym, struct array* pmt_ref, BOOL z_t
      */
     if (z_term && *sym->current++ != 'Z') return NULL;
 
-    if (arg_collect.num == 0 || 
-        (arg_collect.num == 1 && !strcmp(arg_collect.elts[0], "void")))        
+    if (arg_collect.num == 0 ||
+        (arg_collect.num == 1 && !strcmp(arg_collect.elts[0], "void")))
         return str_printf(sym, "%cvoid%c", open_char, close_char);
     for (i = 1; i < arg_collect.num; i++)
     {
@@ -412,12 +412,12 @@ static char* get_args(struct parsed_symbol* sym, struct array* pmt_ref, BOOL z_t
 
     last = args_str ? args_str : arg_collect.elts[0];
     if (close_char == '>' && last[strlen(last) - 1] == '>')
-        args_str = str_printf(sym, "%c%s%s %c", 
+        args_str = str_printf(sym, "%c%s%s %c",
                               open_char, arg_collect.elts[0], args_str, close_char);
     else
-        args_str = str_printf(sym, "%c%s%s%c", 
+        args_str = str_printf(sym, "%c%s%s%c",
                               open_char, arg_collect.elts[0], args_str, close_char);
-    
+
     return args_str;
 }
 
@@ -743,7 +743,7 @@ static BOOL get_calling_convention(char ch, const char** call_conv,
 static const char* get_simple_type(char c)
 {
     const char* type_string;
-    
+
     switch (c)
     {
     case 'C': type_string = "signed char"; break;
@@ -772,7 +772,7 @@ static const char* get_simple_type(char c)
 static const char* get_extended_type(char c)
 {
     const char* type_string;
-    
+
     switch (c)
     {
     case 'D': type_string = "__int8"; break;
@@ -807,7 +807,7 @@ static BOOL demangle_datatype(struct parsed_symbol* sym, struct datatype_t* ct,
 
     assert(ct);
     ct->left = ct->right = NULL;
-    
+
     switch (dt = *sym->current++)
     {
     case '_':
@@ -832,7 +832,7 @@ static BOOL demangle_datatype(struct parsed_symbol* sym, struct datatype_t* ct,
 
             if (!(struct_name = get_class_name(sym)))
                 goto done;
-            if (!(sym->flags & UNDNAME_NO_COMPLEX_TYPE)) 
+            if (!(sym->flags & UNDNAME_NO_COMPLEX_TYPE))
             {
                 switch (dt)
                 {
@@ -880,7 +880,7 @@ static BOOL demangle_datatype(struct parsed_symbol* sym, struct datatype_t* ct,
                 unsigned                mark = sym->stack.num;
 
                 if (!get_calling_convention(*sym->current++,
-                                            &call_conv, &exported, 
+                                            &call_conv, &exported,
                                             sym->flags & ~UNDNAME_NO_ALLOCATION_LANGUAGE) ||
                     !demangle_datatype(sym, &sub_ct, pmt_ref, FALSE))
                     goto done;
@@ -889,7 +889,7 @@ static BOOL demangle_datatype(struct parsed_symbol* sym, struct datatype_t* ct,
                 if (!args) goto done;
                 sym->stack.num = mark;
 
-                ct->left  = str_printf(sym, "%s%s (%s*", 
+                ct->left  = str_printf(sym, "%s%s (%s*",
                                        sub_ct.left, sub_ct.right, call_conv);
                 ct->right = str_printf(sym, ")%s", args);
             }
@@ -985,7 +985,7 @@ static BOOL demangle_datatype(struct parsed_symbol* sym, struct datatype_t* ct,
             return FALSE;
     }
 done:
-    
+
     return ct->left != NULL;
 }
 
@@ -1022,7 +1022,7 @@ static BOOL handle_data(struct parsed_symbol* sym)
         case '0': access = "private: "; break;
         case '1': access = "protected: "; break;
         case '2': access = "public: "; break;
-        } 
+        }
     }
 
     if (!(sym->flags & UNDNAME_NO_MEMBER_TYPE))
@@ -1506,7 +1506,7 @@ char * __unDNameEx(char* buffer, const char* mangled, int buflen,
 
     //TRACE("(%p,%s,%d,%p,%p,%p,%x)\n",
     //      buffer, mangled, buflen, memget, memfree, unknown, flags);
-    
+
     /* The flags details is not documented by MS. However, it looks exactly
      * like the UNDNAME_ manifest constants from imagehlp.h and dbghelp.h
      * So, we copied those (on top of the file)
