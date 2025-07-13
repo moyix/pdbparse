@@ -2,3 +2,9 @@
 
 .idea
 __pycache__
+
+# Build artifacts
+*.egg-info/
+*.so
+build/
+dist/
