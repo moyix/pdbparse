@@ -10,7 +10,7 @@ setup(
     author_email = 'brendandg@gatech.edu',
     url = 'https://github.com/moyix/pdbparse/',
     packages = ['pdbparse'],
-    install_requires = ['construct>=2.9', 'construct<2.10', 'pefile'],
+    install_requires = ['construct>=2.10', 'pefile'],
     classifiers = [
         'License :: OSI Approved :: GNU General Public License (GPL)',
         'Operating System :: OS Independent',
